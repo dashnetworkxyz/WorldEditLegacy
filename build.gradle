@@ -75,7 +75,7 @@ subprojects {
         archives javadocJar
     }
 
-    if (!(name.equals('worldedit-forge') || name.equals('worldedit-sponge'))) {
+    if (!(name == 'worldedit-forge' || name == 'worldedit-sponge')) {
         tasks.register('sourcesJar', Jar) {
             archiveClassifier.set('sources')
             from sourceSets.main.allSource

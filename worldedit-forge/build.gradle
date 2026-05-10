@@ -10,6 +10,7 @@ buildscript {
         maven { url = "https://maven.minecraftforge.net" }
         maven { url = "https://repo.essential.gg/public" }
     }
+
     dependencies {
         classpath 'dev.architectury:architectury-pack200:0.1.3'
         classpath 'gg.essential.loom:gg.essential.loom.gradle.plugin:1.15.50'
@@ -21,7 +22,7 @@ apply plugin: 'dev.architectury.architectury-pack200'
 
 String modid = rootProject.name
 String forgeVersion = '1.8.9-11.15.1.2318-1.8.9'
-File transformerFile = file('src/main/resources/accesstransformer.cfg')
+File transformerFile = file 'src/main/resources/accesstransformer.cfg'
 
 repositories {
     maven { url = 'https://repo.spongepowered.org/maven' }
@@ -32,9 +33,9 @@ dependencies {
     implementation 'org.spongepowered:spongeapi:7.4.0-SNAPSHOT'
     testImplementation 'org.mockito:mockito-core:1.9.0-rc1'
 
-    minecraft('com.mojang:minecraft:1.8.9')
-    mappings('de.oceanlabs.mcp:mcp_stable:22-1.8.9')
-    forge("net.minecraftforge:forge:$forgeVersion")
+    minecraft 'com.mojang:minecraft:1.8.9'
+    mappings 'de.oceanlabs.mcp:mcp_stable:22-1.8.9'
+    forge "net.minecraftforge:forge:$forgeVersion"
 }
 
 java {
@@ -46,7 +47,7 @@ loom {
         pack200Provider.set(Pack200Adapter.getDeclaredConstructor().newInstance())
 
         if (transformerFile.exists()) {
-            println("Installing access transformer")
+            println('Installing access transformer')
             accessTransformer(transformerFile)
         }
     }
@@ -62,7 +63,7 @@ processResources {
         )
     }
 
-    rename('accesstransformer.cfg', "METAINF/${modid}_at.cfg")
+    rename 'accesstransformer.cfg', "METAINF/${modid}_at.cfg"
 }
 
 tasks.withType(org.gradle.jvm.tasks.Jar).configureEach {
