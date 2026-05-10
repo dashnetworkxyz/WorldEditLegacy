@@ -203,7 +203,7 @@ public enum BlockType {
     LOG2(BlockID.LOG2, "Log", "log2", "acacia", "darkoak"),
     ACACIA_STAIRS(BlockID.ACACIA_STAIRS, "Acacia Wood Stairs", "acaciawoodstairs", "acaciastairs"),
     DARK_OAK_STAIRS(BlockID.DARK_OAK_STAIRS, "Dark Oak Wood Stairs", "darkoakwoodstairs", "darkoakstairs"),
-    SLIME(BlockID.SLIME, "SLime", "slimeblock"),
+    SLIME(BlockID.SLIME, "Slime", "slimeblock"),
     BARRIER(BlockID.BARRIER, "Barrier", "barrier", "wall", "worldborder", "edge"),
     IRON_TRAP_DOOR(BlockID.IRON_TRAP_DOOR, "Iron Trap Door", "irontrapdoor"),
     PRISMARINE(BlockID.PRISMARINE, "Prismarine", "prismarine"),
