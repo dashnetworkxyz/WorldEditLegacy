@@ -19,6 +19,8 @@ buildscript {
 apply plugin: 'gg.essential.loom'
 apply plugin: 'dev.architectury.architectury-pack200'
 
+String forgeVersion = '1.8.9-11.15.1.2318-1.8.9'
+
 repositories {
     maven { url = 'https://repo.spongepowered.org/maven' }
 }
@@ -30,7 +32,7 @@ dependencies {
 
     minecraft('com.mojang:minecraft:1.8.9')
     mappings('de.oceanlabs.mcp:mcp_stable:22-1.8.9')
-    forge('net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9')
+    forge("net.minecraftforge:forge:$forgeVersion")
 }
 
 java {
@@ -44,14 +46,13 @@ loom {
 }
 
 processResources {
-    inputs.property('internalVersion', version)
-    inputs.property('mcVersion', '1.8.9')
-    inputs.property('modid', rootProject.name)
-    inputs.property('basePackage', "${group}.forge")
-
-    from(sourceSets.main.resources) {
-        include('mcmod.info')
-        expand(inputs.properties)
+    filesMatching('mcmod.info') {
+        expand(
+                modid: rootProject.name,
+                internalVersion: version,
+                mcVersion: '1.8.9',
+                forgeVersion: forgeVersion
+        )
     }
 }
 
@@ -69,7 +70,7 @@ shadowJar {
         include(dependency(':worldedit-core'))
     }
 
-    archiveClassifier.set('non-obfuscated-with-deps')
+    archiveClassifier.set('non-obfuscated')
 }
 
 tasks.assemble.dependsOn(tasks.remapJar)
