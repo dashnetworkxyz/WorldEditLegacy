@@ -12,8 +12,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'dev.architectury:architectury-pack200:0.1.3'
         classpath 'gg.essential.loom:gg.essential.loom.gradle.plugin:1.15.50'
+        classpath 'dev.architectury:architectury-pack200:0.1.3'
     }
 }
 
