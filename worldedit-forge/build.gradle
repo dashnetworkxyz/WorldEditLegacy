@@ -19,7 +19,9 @@ buildscript {
 apply plugin: 'gg.essential.loom'
 apply plugin: 'dev.architectury.architectury-pack200'
 
+String modid = rootProject.name
 String forgeVersion = '1.8.9-11.15.1.2318-1.8.9'
+File transformerFile = file('src/main/resources/accesstransformer.cfg')
 
 repositories {
     maven { url = 'https://repo.spongepowered.org/maven' }
@@ -42,17 +44,34 @@ java {
 loom {
     forge {
         pack200Provider.set(Pack200Adapter.getDeclaredConstructor().newInstance())
+
+        if (transformerFile.exists()) {
+            println("Installing access transformer")
+            accessTransformer(transformerFile)
+        }
     }
 }
 
 processResources {
     filesMatching('mcmod.info') {
         expand(
-                modid: rootProject.name,
+                modid: modid,
                 internalVersion: version,
                 mcVersion: '1.8.9',
                 forgeVersion: forgeVersion
         )
+    }
+
+    rename('accesstransformer.cfg', "METAINF/${modid}_at.cfg")
+}
+
+tasks.withType(org.gradle.jvm.tasks.Jar).configureEach {
+    archiveBaseName.set(modid)
+    manifest.attributes['FMLCorePluginContainsFMLMod'] = 'true'
+    manifest.attributes['ForceLoadAsMod'] = 'true'
+
+    if (transformerFile.exists()) {
+        manifest.attributes['FMLAT'] = "${modid}_at.cfg"
     }
 }
 

@@ -56,7 +56,6 @@ import net.minecraft.world.gen.feature.*;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -263,9 +262,7 @@ public class ForgeWorld extends AbstractWorld {
                         mcChunk = chunkServer.loadChunk(coord.getBlockX(), coord.getBlockZ());
                         mcChunk.onChunkUnload();
                     }
-                    Field droppedChunksSet = chunkServer.getClass().getDeclaredField("droppedChunksSet");
-                    droppedChunksSet.setAccessible(true);
-                    droppedChunksSet.set(chunkServer, pos);
+                    chunkServer.droppedChunksSet.remove(pos);
                     chunkServer.id2ChunkMap.remove(pos);
                     mcChunk = chunkProvider.provideChunk(coord.getBlockX(), coord.getBlockZ());
                     chunkServer.id2ChunkMap.add(pos, mcChunk);
