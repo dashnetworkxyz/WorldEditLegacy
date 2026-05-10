@@ -1,3 +1,2 @@
 rootProject.name = 'worldedit'
-
-include 'worldedit-core', 'worldedit-bukkit', 'worldedit-forge', 'worldedit-sponge'
+include 'worldedit-core', 'worldedit-bukkit', 'worldedit-forge'//, 'worldedit-sponge' TOOD: No sponge for now

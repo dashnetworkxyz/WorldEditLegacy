@@ -19,35 +19,25 @@
 
 package com.sk89q.worldedit.forge;
 
+import com.mojang.authlib.GameProfile;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.extension.platform.AbstractPlatform;
-import com.sk89q.worldedit.extension.platform.Actor;
-import com.sk89q.worldedit.extension.platform.Capability;
-import com.sk89q.worldedit.extension.platform.MultiUserPlatform;
-import com.sk89q.worldedit.extension.platform.Preference;
+import com.sk89q.worldedit.extension.platform.*;
 import com.sk89q.worldedit.util.command.CommandMapping;
 import com.sk89q.worldedit.util.command.Dispatcher;
 import com.sk89q.worldedit.world.World;
-
 import net.minecraft.block.Block;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
 
@@ -77,7 +67,7 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
             }
         }
 
-        for (Item item : Item.REGISTRY) {
+        for (Item item : Item.itemRegistry) {
             if (item == null) continue;
             if (item.getUnlocalizedName() == null) continue;
             if (item.getUnlocalizedName().startsWith("item.")) {
@@ -93,7 +83,7 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
 
     @Override
     public boolean isValidMobType(String type) {
-        return EntityList.isRegistered(new ResourceLocation(type));
+        return EntityList.stringToClassMapping.containsKey(type);
     }
 
     @Override
@@ -122,7 +112,7 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
         if (player instanceof ForgePlayer) {
             return player;
         } else {
-            EntityPlayerMP entity = server.getPlayerList().getPlayerByUsername(player.getName());
+            EntityPlayerMP entity = server.getConfigurationManager().getPlayerByUsername(player.getName());
             return entity != null ? new ForgePlayer(entity) : null;
         }
     }
@@ -201,8 +191,9 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
     @Override
     public Collection<Actor> getConnectedUsers() {
         List<Actor> users = new ArrayList<Actor>();
-        PlayerList scm = server.getPlayerList();
-        for (EntityPlayerMP entity : scm.getPlayers()) {
+        ServerConfigurationManager scm = server.getConfigurationManager();
+        for (GameProfile profile : scm.getAllProfiles()) {
+            EntityPlayerMP entity = scm.getPlayerByUUID(profile.getId());
             if (entity != null) {
                 users.add(new ForgePlayer(entity));
             }

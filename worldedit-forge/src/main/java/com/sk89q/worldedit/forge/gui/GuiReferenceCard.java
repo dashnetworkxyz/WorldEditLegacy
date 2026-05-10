@@ -50,7 +50,7 @@ public class GuiReferenceCard extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton button) {
         if (button.id == 0) {
-            this.mc.player.closeScreen();
+            this.mc.thePlayer.closeScreen();
         }
     }
 

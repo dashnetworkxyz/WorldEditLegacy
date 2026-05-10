@@ -20,13 +20,11 @@
 package com.sk89q.worldedit.forge;
 
 import com.sk89q.worldedit.forge.gui.GuiHandler;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
-
 import org.lwjgl.input.Keyboard;
 
 public class KeyHandler {
@@ -40,8 +38,8 @@ public class KeyHandler {
 
     @SubscribeEvent
     public void onKey(KeyInputEvent evt) {
-        if (mc.player != null && mc.world != null && mainKey.isPressed()) {
-            mc.player.openGui(ForgeWorldEdit.inst, GuiHandler.REFERENCE_ID, mc.world, 0, 0, 0);
+        if (mc.thePlayer != null && mc.theWorld != null && mainKey.isPressed()) {
+            mc.thePlayer.openGui(ForgeWorldEdit.inst, GuiHandler.REFERENCE_ID, mc.theWorld, 0, 0, 0);
         }
     }
 

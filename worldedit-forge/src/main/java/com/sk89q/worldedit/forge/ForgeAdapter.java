@@ -22,9 +22,9 @@ package com.sk89q.worldedit.forge;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.world.World;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.Vector3d;
 
 final class ForgeAdapter {
 
@@ -35,7 +35,7 @@ final class ForgeAdapter {
         return new ForgeWorld(world);
     }
 
-    public static Vector adapt(Vec3d vector) {
+    public static Vector adapt(Vector3d vector) {
         return new Vector(vector.x, vector.y, vector.z);
     }
 
@@ -43,8 +43,12 @@ final class ForgeAdapter {
         return new Vector(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    public static Vec3d toVec3(Vector vector) {
-        return new Vec3d(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
+    public static Vector3d toVec3(Vector vector) {
+        Vector3d vec3d = new Vector3d();
+        vec3d.x = vector.getBlockX();
+        vec3d.y = vector.getBlockY();
+        vec3d.z = vector.getBlockZ();
+        return vec3d;
     }
 
     public static EnumFacing adapt(Direction face) {

@@ -1,25 +1,26 @@
-apply plugin: 'eclipse'
-apply plugin: 'idea'
+plugins {
+    id 'eclipse'
+    id 'idea'
+}
 
 dependencies {
-    compile 'de.schlichtherle:truezip:6.8.3'
-    compile 'rhino:js:1.7R2'
-    compile 'org.yaml:snakeyaml:1.9'
-    compile 'com.google.guava:guava:21.0'
-    compile 'com.sk89q:jchronic:0.2.4a'
-    compile 'com.google.code.findbugs:jsr305:1.3.9'
-    compile 'com.thoughtworks.paranamer:paranamer:2.6'
-    compile 'com.google.code.gson:gson:2.2.4'
-    compile 'com.sk89q.lib:jlibnoise:1.0.0'
-    //compile 'net.sf.trove4j:trove4j:3.0.3'
-    testCompile 'org.mockito:mockito-core:1.9.0-rc1'
+    implementation 'de.schlichtherle:truezip:6.8.3'
+    implementation 'rhino:js:1.7R2'
+    implementation 'org.yaml:snakeyaml:1.9'
+    implementation 'com.google.guava:guava:21.0'
+    implementation 'com.sk89q:jchronic:0.2.4a'
+    implementation 'com.google.code.findbugs:jsr305:1.3.9'
+    implementation 'com.thoughtworks.paranamer:paranamer:2.6'
+    implementation 'com.google.code.gson:gson:2.2.4'
+    implementation 'com.sk89q.lib:jlibnoise:1.0.0'
+    //implementation 'net.sf.trove4j:trove4j:3.0.3'
+    testImplementation 'org.mockito:mockito-core:1.9.0-rc1'
 }
 
 sourceSets {
     main {
         java {
-            srcDir 'src/main/java'
-            srcDir 'src/legacy/java'
+            srcDirs = ['src/main/java', 'src/legacy/java']
         }
         resources {
             srcDir 'src/main/resources'
@@ -27,4 +28,4 @@ sourceSets {
     }
 }
 
-build.dependsOn(shadowJar)
+tasks.build.dependsOn(tasks.shadowJar)

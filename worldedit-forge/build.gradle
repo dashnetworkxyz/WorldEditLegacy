@@ -1,53 +1,117 @@
+import dev.architectury.pack200.java.Pack200Adapter
+
 buildscript {
+    project.ext.set('loom.platform', 'forge')
+
     repositories {
         mavenCentral()
-        maven { url = "http://files.minecraftforge.net/maven" }
-        maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
-        jcenter()
+        maven { url = "https://maven.architectury.dev" }
+        maven { url = "https://maven.fabricmc.net" }
+        maven { url = "https://maven.minecraftforge.net" }
+        maven { url = "https://repo.essential.gg/public" }
     }
-
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'dev.architectury:architectury-pack200:0.1.3'
+        classpath 'gg.essential.loom:gg.essential.loom.gradle.plugin:1.15.50'
     }
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'gg.essential.loom'
+apply plugin: 'dev.architectury.architectury-pack200'
 
-
-dependencies {
-    compile project(':worldedit-core')
-    compile 'org.spongepowered:spongeapi:6.0.0-SNAPSHOT'
-    testCompile group: 'org.mockito', name: 'mockito-core', version: '1.9.0-rc1'
-}
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+final String modid = rootProject.name
 
 repositories {
-    maven {
-        name = "Sponge"
-        url = "https://repo.spongepowered.org/maven"
+    maven { url = 'https://repo.spongepowered.org/maven' }
+}
+
+dependencies {
+    implementation project(':worldedit-core')
+    implementation 'org.spongepowered:spongeapi:7.4.0-SNAPSHOT'
+    testImplementation 'org.mockito:mockito-core:1.9.0-rc1'
+
+    minecraft('com.mojang:minecraft:1.8.9')
+    mappings('de.oceanlabs.mcp:mcp_stable:22-1.8.9')
+    forge('net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9')
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(8))
+}
+
+loom {
+    forge {
+        pack200Provider.set(Pack200Adapter.newInstance())
     }
 }
 
-ext.forgeVersion = "14.22.0.2456"
-
-minecraft {
-    version = "1.12.1-${project.forgeVersion}"
-    mappings = "snapshot_20170815"
-    runDir = 'run'
-
-    replaceIn "com/sk89q/worldedit/forge/ForgeWorldEdit.java"
-    replace "%VERSION%", project.version
+/*
+sourceSets.main {
+    output.setResourcesDir(outputSets.main.flatMap { it.java.classesDirectory })
 }
 
-project.archivesBaseName = "${project.archivesBaseName}-mc${minecraft.version}"
+ */
+
+/*
+tasks.withType(JavaCompile::class) {
+    options.encoding = 'UTF-8'
+}
+ */
+
+/*
+tasks.withType(org.gradle.jvm.tasks.Jar::class) {
+    archiveBaseName(modid)
+    manifest.attributes.run {
+        this['FMLCorePluginContainsFMLMod'] = 'true'
+        this['ForceLoadAsMod'] = 'true'
+        this['WorldEdit-Version'] = version
+        this['FMLAT'] = 'worldedit_at.cfg'
+    }
+}
+ */
+
+processResources {
+    inputs.property('version', version)
+    inputs.property('mcversion', '1.8.9')
+    inputs.property('modid', modid)
+    inputs.property('basePackage', "${group}.forge")
+
+    from('mcmod.info') {
+        expand(inputs.properties)
+    }
+}
+
+remapJar {
+    archiveClassifier.set('')
+    from(tasks.shadowJar)
+    input.set(tasks.shadowJar.archiveFile)
+}
+
+jar {
+    archiveClassifier.set('without-deps')
+    destinationDirectory.set(layout.buildDirectory.dir('intermediates'))
+}
+
+shadowJar {
+    dependencies {
+        include(dependency(':worldedit-core'))
+    }
+
+    archiveClassifier.set('non-obfuscated-with-deps')
+    destinationDirectory.set(layout.buildDirectory.dir('intermediates'))
+    //configurations = listOf(configurations.implementation.get().extendsFrom(this))
+}
+
+tasks.assemble.dependsOn(tasks.remapJar)
+
+/*
+//project.archivesBaseName = "${project.archivesBaseName}-mc${minecraft.version}"
 
 processResources {
     from (sourceSets.main.resources.srcDirs) {
         expand 'version': project.version,
-                'mcVersion': project.minecraft.version,
-                'forgeVersion': project.forgeVersion,
+                'mcVersion': '1.8.9',
+                //'forgeVersion': project.forgeVersion,
                 'internalVersion': project.internalVersion
         include 'mcmod.info'
     }
@@ -65,19 +129,13 @@ jar {
     }
 }
 
-shadowJar {
-    dependencies {
-        include(dependency(':worldedit-core'))
-    }
-}
-
 reobf {
     shadowJar {
         mappingType = 'SEARGE'
     }
 }
 
-task deobfJar(type: Jar) {
+tasks.register('deobfJar', Jar) {
     from sourceSets.main.output
     classifier = 'dev'
 }
@@ -85,3 +143,4 @@ task deobfJar(type: Jar) {
 artifacts {
     archives deobfJar
 }
+ */

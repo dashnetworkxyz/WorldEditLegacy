@@ -29,9 +29,9 @@ public class ForgeItemRegistry implements ItemRegistry {
     @Nullable
     @Override
     public BaseItem createFromId(String id) {
-        Item match = Item.REGISTRY.getObject(new ResourceLocation(id));
+        Item match = Item.itemRegistry.getObject(new ResourceLocation(id));
         if (match != null) {
-            return new BaseItem(Item.REGISTRY.getIDForObject(match), (short) 0);
+            return new BaseItem(Item.itemRegistry.getIDForObject(match), (short) 0);
         } else {
             return null;
         }
@@ -40,7 +40,7 @@ public class ForgeItemRegistry implements ItemRegistry {
     @Nullable
     @Override
     public BaseItem createFromId(int id) {
-        if (Item.REGISTRY.getObjectById(id) != null) {
+        if (Item.itemRegistry.getObjectById(id) != null) {
             return new BaseItem(id, (short) 0);
         } else {
             return null;

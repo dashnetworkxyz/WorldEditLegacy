@@ -20,15 +20,14 @@
 package com.sk89q.worldedit.forge;
 
 import com.sk89q.worldedit.util.command.CommandMapping;
-
-import java.util.Arrays;
-import java.util.List;
-import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
+
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
 
 public class CommandWrapper extends CommandBase {
     private CommandMapping command;
@@ -38,21 +37,21 @@ public class CommandWrapper extends CommandBase {
     }
 
     @Override
-    public String getName() {
+    public String getCommandName() {
         return command.getPrimaryAlias();
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> getCommandAliases() {
         return Arrays.asList(command.getAllAliases());
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
     }
 
     @Override
-    public String getUsage(ICommandSender icommandsender) {
+    public String getCommandUsage(ICommandSender icommandsender) {
         return "/" + command.getPrimaryAlias() + " " + command.getDescription().getUsage();
     }
 
@@ -62,7 +61,7 @@ public class CommandWrapper extends CommandBase {
     }
 
     @Override
-    public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
         return true;
     }
 
