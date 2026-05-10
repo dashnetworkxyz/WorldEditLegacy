@@ -19,8 +19,6 @@ buildscript {
 apply plugin: 'gg.essential.loom'
 apply plugin: 'dev.architectury.architectury-pack200'
 
-final String modid = rootProject.name
-
 repositories {
     maven { url = 'https://repo.spongepowered.org/maven' }
 }
@@ -41,55 +39,29 @@ java {
 
 loom {
     forge {
-        pack200Provider.set(Pack200Adapter.newInstance())
+        pack200Provider.set(Pack200Adapter.getDeclaredConstructor().newInstance())
     }
 }
-
-/*
-sourceSets.main {
-    output.setResourcesDir(outputSets.main.flatMap { it.java.classesDirectory })
-}
-
- */
-
-/*
-tasks.withType(JavaCompile::class) {
-    options.encoding = 'UTF-8'
-}
- */
-
-/*
-tasks.withType(org.gradle.jvm.tasks.Jar::class) {
-    archiveBaseName(modid)
-    manifest.attributes.run {
-        this['FMLCorePluginContainsFMLMod'] = 'true'
-        this['ForceLoadAsMod'] = 'true'
-        this['WorldEdit-Version'] = version
-        this['FMLAT'] = 'worldedit_at.cfg'
-    }
-}
- */
 
 processResources {
-    inputs.property('version', version)
-    inputs.property('mcversion', '1.8.9')
-    inputs.property('modid', modid)
+    inputs.property('internalVersion', version)
+    inputs.property('mcVersion', '1.8.9')
+    inputs.property('modid', rootProject.name)
     inputs.property('basePackage', "${group}.forge")
 
-    from('mcmod.info') {
+    from(sourceSets.main.resources) {
+        include('mcmod.info')
         expand(inputs.properties)
     }
 }
 
 remapJar {
     archiveClassifier.set('')
-    from(tasks.shadowJar)
-    input.set(tasks.shadowJar.archiveFile)
+    inputFile.set(tasks.shadowJar.archiveFile)
 }
 
 jar {
     archiveClassifier.set('without-deps')
-    destinationDirectory.set(layout.buildDirectory.dir('intermediates'))
 }
 
 shadowJar {
@@ -98,49 +70,6 @@ shadowJar {
     }
 
     archiveClassifier.set('non-obfuscated-with-deps')
-    destinationDirectory.set(layout.buildDirectory.dir('intermediates'))
-    //configurations = listOf(configurations.implementation.get().extendsFrom(this))
 }
 
 tasks.assemble.dependsOn(tasks.remapJar)
-
-/*
-//project.archivesBaseName = "${project.archivesBaseName}-mc${minecraft.version}"
-
-processResources {
-    from (sourceSets.main.resources.srcDirs) {
-        expand 'version': project.version,
-                'mcVersion': '1.8.9',
-                //'forgeVersion': project.forgeVersion,
-                'internalVersion': project.internalVersion
-        include 'mcmod.info'
-    }
-
-    from (sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
-
-jar {
-    manifest {
-        attributes("Class-Path": "truezip.jar WorldEdit/truezip.jar js.jar WorldEdit/js.jar",
-                   "WorldEdit-Version": version,
-                   "FMLAT": "worldedit_at.cfg")
-    }
-}
-
-reobf {
-    shadowJar {
-        mappingType = 'SEARGE'
-    }
-}
-
-tasks.register('deobfJar', Jar) {
-    from sourceSets.main.output
-    classifier = 'dev'
-}
-
-artifacts {
-    archives deobfJar
-}
- */
