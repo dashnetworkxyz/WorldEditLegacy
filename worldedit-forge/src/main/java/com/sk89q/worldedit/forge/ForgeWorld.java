@@ -77,7 +77,7 @@ public class ForgeWorld extends AbstractWorld {
 
     private static final IBlockState JUNGLE_LOG = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
     private static final IBlockState JUNGLE_LEAF = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
-    //private static final IBlockState JUNGLE_SHRUB = Blocks.leaves2.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false)); TODO: Fix
+    private static final IBlockState JUNGLE_SHRUB = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
     
     private final WeakReference<World> worldRef;
 
@@ -310,7 +310,7 @@ public class ForgeWorld extends AbstractWorld {
             case JUNGLE: return new WorldGenMegaJungle(true, 10, 20, JUNGLE_LOG, JUNGLE_LEAF);
             case SMALL_JUNGLE: return new WorldGenTrees(true, 4 + random.nextInt(7), JUNGLE_LOG, JUNGLE_LEAF, false);
             case SHORT_JUNGLE: return new WorldGenTrees(true, 4 + random.nextInt(7), JUNGLE_LOG, JUNGLE_LEAF, true);
-            case JUNGLE_BUSH: return new WorldGenShrub(JUNGLE_LOG, /*JUNGLE_SHRUB*/null);
+            case JUNGLE_BUSH: return new WorldGenShrub(JUNGLE_LOG, JUNGLE_SHRUB);
             case RED_MUSHROOM: return new WorldGenBigMushroom(Blocks.brown_mushroom_block);
             case BROWN_MUSHROOM: return new WorldGenBigMushroom(Blocks.red_mushroom_block);
             case SWAMP: return new WorldGenSwamp();
