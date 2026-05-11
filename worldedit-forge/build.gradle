@@ -1,8 +1,4 @@
-import dev.architectury.pack200.java.Pack200Adapter
-
 buildscript {
-    project.ext.set('loom.platform', 'forge')
-
     repositories {
         mavenCentral()
         maven { url = "https://maven.architectury.dev" }
@@ -20,77 +16,4 @@ buildscript {
 apply plugin: 'gg.essential.loom'
 apply plugin: 'dev.architectury.architectury-pack200'
 
-String modid = rootProject.name
-String forgeVersion = '1.8.9-11.15.1.2318-1.8.9'
-File transformerFile = file 'src/main/resources/accesstransformer.cfg'
-
-repositories {
-    maven { url = 'https://repo.spongepowered.org/maven' }
-}
-
-dependencies {
-    implementation project(':worldedit-core')
-    implementation 'org.spongepowered:spongeapi:7.4.0-SNAPSHOT'
-    testImplementation 'org.mockito:mockito-core:1.9.0-rc1'
-
-    minecraft 'com.mojang:minecraft:1.8.9'
-    mappings 'de.oceanlabs.mcp:mcp_stable:22-1.8.9'
-    forge "net.minecraftforge:forge:$forgeVersion"
-}
-
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(8))
-}
-
-loom {
-    forge {
-        pack200Provider.set(Pack200Adapter.getDeclaredConstructor().newInstance())
-
-        if (transformerFile.exists()) {
-            println('Installing access transformer')
-            accessTransformer(transformerFile)
-        }
-    }
-}
-
-processResources {
-    filesMatching('mcmod.info') {
-        expand(
-                modid: modid,
-                internalVersion: version,
-                mcVersion: '1.8.9',
-                forgeVersion: forgeVersion
-        )
-    }
-
-    rename 'accesstransformer.cfg', "METAINF/${modid}_at.cfg"
-}
-
-tasks.withType(org.gradle.jvm.tasks.Jar).configureEach {
-    archiveBaseName.set(modid)
-    manifest.attributes['FMLCorePluginContainsFMLMod'] = 'true'
-    manifest.attributes['ForceLoadAsMod'] = 'true'
-
-    if (transformerFile.exists()) {
-        manifest.attributes['FMLAT'] = "${modid}_at.cfg"
-    }
-}
-
-remapJar {
-    archiveClassifier.set('')
-    inputFile.set(tasks.shadowJar.archiveFile)
-}
-
-jar {
-    archiveClassifier.set('without-deps')
-}
-
-shadowJar {
-    dependencies {
-        include(dependency(':worldedit-core'))
-    }
-
-    archiveClassifier.set('non-obfuscated')
-}
-
-tasks.assemble.dependsOn(tasks.remapJar)
+loom.noServerRunConfigs()
