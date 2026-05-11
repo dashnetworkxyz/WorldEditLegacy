@@ -214,7 +214,7 @@ final class NBTConverter {
 
     public static CompoundTag fromNative(NBTTagCompound other) {
         Set<String> tags = other.getKeySet();
-        Map<String, Tag> map = new HashMap<String, Tag>();
+        Map<String, Tag> map = new HashMap<>();
         for (String tagName : tags) {
             map.put(tagName, fromNative(other.getTag(tagName)));
         }

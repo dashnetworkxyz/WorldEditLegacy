@@ -21,17 +21,17 @@ package com.sk89q.worldedit.forge;
 
 import net.minecraft.command.ICommand;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.WorldSettings;
+import net.minecraft.world.WorldSettings.GameType;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.spongepowered.api.entity.living.player.Player;
 
 public interface ForgePermissionsProvider {
 
-    public boolean hasPermission(EntityPlayerMP player, String permission);
+    boolean hasPermission(EntityPlayerMP player, String permission);
 
-    public void registerPermission(ICommand command, String permission);
+    void registerPermission(ICommand command, String permission);
 
-    public static class VanillaPermissionsProvider implements ForgePermissionsProvider {
+    class VanillaPermissionsProvider implements ForgePermissionsProvider {
 
         private ForgePlatform platform;
 
@@ -44,14 +44,14 @@ public interface ForgePermissionsProvider {
             ForgeConfiguration configuration = platform.getConfiguration();
             return configuration.cheatMode ||
                     FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().canSendCommands(player.getGameProfile()) ||
-                    (configuration.creativeEnable && player.theItemInWorldManager.getGameType() == WorldSettings.GameType.CREATIVE);
+                    (configuration.creativeEnable && player.theItemInWorldManager.getGameType() == GameType.CREATIVE);
         }
 
         @Override
         public void registerPermission(ICommand command, String permission) {}
     }
 
-    public static class SpongePermissionsProvider implements ForgePermissionsProvider {
+    class SpongePermissionsProvider implements ForgePermissionsProvider {
 
         @Override
         public boolean hasPermission(EntityPlayerMP player, String permission) {

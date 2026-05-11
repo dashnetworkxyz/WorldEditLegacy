@@ -20,41 +20,24 @@
 package com.sk89q.worldedit.forge;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.blocks.LazyBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.internal.Constants;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TreeGenerator.TreeType;
 import com.sk89q.worldedit.world.AbstractWorld;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.registry.WorldData;
-import net.minecraft.block.*;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraft.world.gen.feature.*;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +45,38 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockOldLeaf;
+import net.minecraft.block.BlockOldLog;
+import net.minecraft.block.BlockPlanks;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.init.Blocks;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.feature.WorldGenBigMushroom;
+import net.minecraft.world.gen.feature.WorldGenBigTree;
+import net.minecraft.world.gen.feature.WorldGenCanopyTree;
+import net.minecraft.world.gen.feature.WorldGenForest;
+import net.minecraft.world.gen.feature.WorldGenMegaJungle;
+import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
+import net.minecraft.world.gen.feature.WorldGenSavannaTree;
+import net.minecraft.world.gen.feature.WorldGenShrub;
+import net.minecraft.world.gen.feature.WorldGenSwamp;
+import net.minecraft.world.gen.feature.WorldGenTaiga1;
+import net.minecraft.world.gen.feature.WorldGenTaiga2;
+import net.minecraft.world.gen.feature.WorldGenTrees;
+import net.minecraft.world.gen.feature.WorldGenerator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -71,7 +86,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ForgeWorld extends AbstractWorld {
 
     private static final Random random = new Random();
-    private static final int UPDATE = 1, NOTIFY = 2;
+    private static final int UPDATE = 1, NOTIFY = 2, NOTIFY_CLIENT = 4;
     private static final Logger logger = Logger.getLogger(ForgeWorld.class.getCanonicalName());
 
     private static final IBlockState JUNGLE_LOG = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
@@ -87,7 +102,7 @@ public class ForgeWorld extends AbstractWorld {
      */
     ForgeWorld(World world) {
         checkNotNull(world);
-        this.worldRef = new WeakReference<World>(world);
+        this.worldRef = new WeakReference<>(world);
     }
 
     /**
@@ -139,7 +154,6 @@ public class ForgeWorld extends AbstractWorld {
         Chunk chunk = world.getChunkFromChunkCoords(x >> 4, z >> 4);
         BlockPos pos = new BlockPos(x, y, z);
         IBlockState old = chunk.getBlockState(pos);
-        @SuppressWarnings("deprecation")
         IBlockState newState = Block.getBlockById(block.getId()).getStateFromMeta(block.getData());
         IBlockState successState = chunk.setBlockState(pos, newState);
         boolean successful = successState != null;
@@ -205,15 +219,6 @@ public class ForgeWorld extends AbstractWorld {
         }
 
         return false;
-    }
-
-    @Override
-    public boolean useItem(Vector position, BaseItem item, Direction face) {
-        Item nativeItem = Item.getItemById(item.getType());
-        ItemStack stack = new ItemStack(nativeItem, 1, item.getData());
-        World world = getWorld();
-        return stack.onItemUse(new WorldEditFakePlayer((WorldServer) world), world, ForgeAdapter.toBlockPos(position),
-                ForgeAdapter.adapt(face), 0, 0, 0);
     }
 
     @Override
@@ -324,9 +329,9 @@ public class ForgeWorld extends AbstractWorld {
     }
 
     @Override
-    public boolean generateTree(TreeType type, EditSession editSession, Vector position) throws MaxChangedBlocksException {
+    public boolean generateTree(TreeType type, EditSession editSession, Vector position) {
         WorldGenerator generator = createWorldGenerator(type);
-        return generator != null ? generator.generate(getWorld(), random, ForgeAdapter.toBlockPos(position)) : false;
+        return generator != null && generator.generate(getWorld(), random, ForgeAdapter.toBlockPos(position));
     }
 
     @Override
@@ -336,8 +341,7 @@ public class ForgeWorld extends AbstractWorld {
 
     @Override
     public boolean isValidBlockType(int id) {
-        Block block = Block.getBlockById(id);
-        return Block.getIdFromBlock(block) == id;
+        return (id == 0) || (net.minecraft.block.Block.getBlockById(id) != null);
     }
 
     @Override
@@ -375,7 +379,7 @@ public class ForgeWorld extends AbstractWorld {
             ForgeWorld other = ((ForgeWorld) o);
             World otherWorld = other.worldRef.get();
             World thisWorld = worldRef.get();
-            return otherWorld != null && thisWorld != null && otherWorld.equals(thisWorld);
+            return otherWorld != null && otherWorld.equals(thisWorld);
         } else if (o instanceof com.sk89q.worldedit.world.World) {
             return ((com.sk89q.worldedit.world.World) o).getName().equals(getName());
         } else {
@@ -385,8 +389,10 @@ public class ForgeWorld extends AbstractWorld {
 
     @Override
     public List<? extends Entity> getEntities(Region region) {
-        List<Entity> entities = new ArrayList<Entity>();
-        for (net.minecraft.entity.Entity entity : getWorld().loadedEntityList) {
+        List<Entity> entities = new ArrayList<>();
+        World world = getWorld();
+        List<net.minecraft.entity.Entity> ents = world.loadedEntityList;
+        for (net.minecraft.entity.Entity entity : ents) {
             if (region.contains(new Vector(entity.posX, entity.posY, entity.posZ))) {
                 entities.add(new ForgeEntity(entity));
             }
@@ -396,7 +402,7 @@ public class ForgeWorld extends AbstractWorld {
 
     @Override
     public List<? extends Entity> getEntities() {
-        List<Entity> entities = new ArrayList<Entity>();
+        List<Entity> entities = new ArrayList<>();
         for (net.minecraft.entity.Entity entity : getWorld().loadedEntityList) {
             entities.add(new ForgeEntity(entity));
         }
@@ -430,7 +436,6 @@ public class ForgeWorld extends AbstractWorld {
     /**
      * Thrown when the reference to the world is lost.
      */
-    @SuppressWarnings("serial")
     private static class WorldReferenceLostException extends WorldEditException {
         private WorldReferenceLostException(String message) {
             super(message);

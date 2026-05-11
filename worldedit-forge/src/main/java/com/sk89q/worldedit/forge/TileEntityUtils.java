@@ -20,6 +20,7 @@
 package com.sk89q.worldedit.forge;
 
 import com.sk89q.worldedit.Vector;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
@@ -27,6 +28,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+
 import java.lang.reflect.Constructor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -122,6 +124,7 @@ final class TileEntityUtils {
 
         TileEntity genericTE;
         try {
+            // Downcast here for return while retaining the type
             genericTE = baseConstructor.newInstance();
         } catch (Throwable e) {
             return null;

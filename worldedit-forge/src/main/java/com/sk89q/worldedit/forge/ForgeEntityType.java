@@ -20,7 +20,11 @@
 package com.sk89q.worldedit.forge;
 
 import com.sk89q.worldedit.entity.metadata.EntityType;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.IMerchant;
+import net.minecraft.entity.INpc;
+import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.*;
 import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.passive.EntityAmbientCreature;

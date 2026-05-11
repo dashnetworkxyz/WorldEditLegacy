@@ -29,23 +29,27 @@ import com.sk89q.worldedit.internal.LocalWorldAdapter;
 import com.sk89q.worldedit.internal.cui.CUIEvent;
 import com.sk89q.worldedit.session.SessionKey;
 import com.sk89q.worldedit.util.Location;
-import io.netty.buffer.Unpooled;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.util.ChatComponentText;
+import io.netty.buffer.Unpooled;
 import net.minecraft.util.EnumChatFormatting;
 
 import javax.annotation.Nullable;
+
 import java.util.UUID;
 
 public class ForgePlayer extends AbstractPlayerActor {
 
+    private final ForgePlatform platform;
     private final EntityPlayerMP player;
 
-    protected ForgePlayer(EntityPlayerMP player) {
+    protected ForgePlayer(ForgePlatform platform, EntityPlayerMP player) {
+        this.platform = platform;
         this.player = player;
         ThreadSafeCache.getInstance().getOnlineIds().add(getUniqueId());
     }
@@ -57,7 +61,7 @@ public class ForgePlayer extends AbstractPlayerActor {
 
     @Override
     public int getItemInHand() {
-        ItemStack is = this.player.getHeldItem();
+        ItemStack is = this.player.getCurrentEquippedItem();
         return is == null ? 0 : Item.getIdFromItem(is.getItem());
     }
 
@@ -81,7 +85,6 @@ public class ForgePlayer extends AbstractPlayerActor {
                 this.player.rotationPitch);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public WorldVector getPosition() {
         return new WorldVector(LocalWorldAdapter.adapt(ForgeWorldEdit.inst.getWorld(this.player.worldObj)), this.player.posX, this.player.posY, this.player.posZ);

@@ -34,9 +34,8 @@ public class GuiHandler implements IGuiHandler {
 
     @Override
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-        switch (id) {
-            case REFERENCE_ID:
-                return new GuiReferenceCard();
+        if (id == REFERENCE_ID) {
+            return new GuiReferenceCard();
         }
 
         return null;

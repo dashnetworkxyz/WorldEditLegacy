@@ -20,11 +20,9 @@
 package com.sk89q.worldedit.forge;
 
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.world.World;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Vector3d;
+import net.minecraft.util.Vec3;
 
 final class ForgeAdapter {
 
@@ -35,33 +33,16 @@ final class ForgeAdapter {
         return new ForgeWorld(world);
     }
 
-    public static Vector adapt(Vector3d vector) {
-        return new Vector(vector.x, vector.y, vector.z);
+    public static Vector adapt(Vec3 vector) {
+        return new Vector(vector.xCoord, vector.yCoord, vector.zCoord);
     }
 
     public static Vector adapt(BlockPos pos) {
         return new Vector(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    public static Vector3d toVec3(Vector vector) {
-        Vector3d vec3d = new Vector3d();
-        vec3d.x = vector.getBlockX();
-        vec3d.y = vector.getBlockY();
-        vec3d.z = vector.getBlockZ();
-        return vec3d;
-    }
-
-    public static EnumFacing adapt(Direction face) {
-        switch (face) {
-            case NORTH: return EnumFacing.NORTH;
-            case SOUTH: return EnumFacing.SOUTH;
-            case WEST: return EnumFacing.WEST;
-            case EAST: return EnumFacing.EAST;
-            case DOWN: return EnumFacing.DOWN;
-            case UP:
-            default:
-                return EnumFacing.UP;
-        }
+    public static Vec3 toVec3(Vector vector) {
+        return new Vec3(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
     }
 
     public static BlockPos toBlockPos(Vector vector) {

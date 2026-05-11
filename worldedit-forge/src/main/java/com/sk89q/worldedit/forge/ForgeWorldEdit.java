@@ -19,6 +19,8 @@
 
 package com.sk89q.worldedit.forge;
 
+import org.apache.logging.log4j.Logger;
+
 import com.google.common.base.Joiner;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
@@ -27,6 +29,9 @@ import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.event.platform.PlatformReadyEvent;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.internal.LocalWorldAdapter;
+
+import java.io.File;
+import java.util.Map;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -34,18 +39,20 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.*;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.apache.logging.log4j.Logger;
-
-import java.io.File;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -102,6 +109,8 @@ public class ForgeWorldEdit {
             logger.warn("FMLServerStartingEvent occurred when FMLServerStoppingEvent hasn't");
             WorldEdit.getInstance().getPlatformManager().unregister(platform);
         }
+
+        ForgeBiomeRegistry.populate();
 
         this.platform = new ForgePlatform(this);
 
@@ -175,13 +184,16 @@ public class ForgeWorldEdit {
                 if (we.handleRightClick(player)) {
                     event.setCanceled(true);
                 }
+
+                break;
             }
-            case RIGHT_CLICK_AIR:
+            case RIGHT_CLICK_AIR: {
                 if (we.handleRightClick(player)) {
                     event.setCanceled(true);
                 }
 
                 break;
+            }
         }
     }
 
@@ -211,7 +223,7 @@ public class ForgeWorldEdit {
      */
     public ForgePlayer wrap(EntityPlayerMP player) {
         checkNotNull(player);
-        return new ForgePlayer(player);
+        return new ForgePlayer(platform, player);
     }
 
     /**

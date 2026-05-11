@@ -40,7 +40,7 @@ class ForgeEntity implements Entity {
 
     ForgeEntity(net.minecraft.entity.Entity entity) {
         checkNotNull(entity);
-        this.entityRef = new WeakReference<net.minecraft.entity.Entity>(entity);
+        this.entityRef = new WeakReference<>(entity);
     }
 
     @Override

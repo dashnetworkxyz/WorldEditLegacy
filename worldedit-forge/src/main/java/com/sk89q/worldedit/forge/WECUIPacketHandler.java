@@ -20,6 +20,10 @@
 package com.sk89q.worldedit.forge;
 
 import com.sk89q.worldedit.LocalSession;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.PacketBuffer;
@@ -31,10 +35,8 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientCustomPacketE
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
-import java.nio.charset.Charset;
-
 public class WECUIPacketHandler {
-    public static final Charset UTF_8_CHARSET = Charset.forName("UTF-8");
+    public static final Charset UTF_8_CHARSET = StandardCharsets.UTF_8;
     public static FMLEventChannel WECUI_CHANNEL;
     
     public static void init() {
@@ -62,8 +64,7 @@ public class WECUIPacketHandler {
     public void callProcessPacket(ClientCustomPacketEvent event) {
         try {
             new S3FPacketCustomPayload(event.packet.channel(), new PacketBuffer(event.packet.payload())).processPacket(event.handler);
-        } catch (ThreadQuickExitException suppress) {
-        }
+        } catch (ThreadQuickExitException ignored) {}
     }
 
     private static EntityPlayerMP getPlayerFromEvent(ServerCustomPacketEvent event) {
