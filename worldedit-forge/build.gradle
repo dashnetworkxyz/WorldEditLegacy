@@ -15,5 +15,3 @@ buildscript {
 
 apply plugin: 'gg.essential.loom'
 apply plugin: 'dev.architectury.architectury-pack200'
-
-loom.noServerRunConfigs()
