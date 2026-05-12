@@ -72,7 +72,6 @@ subprojects {
 
     artifacts {
         archives jar
-        archives javadocJar
     }
 
     if (!(name == 'worldedit-forge' || name == 'worldedit-sponge')) {
@@ -89,8 +88,6 @@ subprojects {
 
         build.dependsOn(sourcesJar)
     }
-
-    build.dependsOn(javadocJar)
 
     shadowJar {
         archiveClassifier.set('dist')

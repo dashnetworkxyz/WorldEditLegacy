@@ -20,29 +20,59 @@
 package com.sk89q.worldedit.forge;
 
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.world.World;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.EnumFacing;
+//#if MC>10809
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+//#else
+//$$import net.minecraft.util.BlockPos;
+//$$import net.minecraft.util.Vec3;
+//#endif
 
 final class ForgeAdapter {
 
-    private ForgeAdapter() {
-    }
+    private ForgeAdapter() {}
 
     public static World adapt(net.minecraft.world.World world) {
         return new ForgeWorld(world);
     }
 
-    public static Vector adapt(Vec3 vector) {
-        return new Vector(vector.xCoord, vector.yCoord, vector.zCoord);
+    //#if MC>10809
+    public static Vector adapt(Vec3d vector) {
+    //#else
+    //$$public static Vector adapt(Vec3 vector) {
+    //#endif
+        //#if MC>11002
+        return new Vector(vector.x, vector.y, vector.z);
+        //#else
+        //$$return new Vector(vector.xCoord, vector.yCoord, vector.zCoord);
+        //#endif
     }
 
     public static Vector adapt(BlockPos pos) {
         return new Vector(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    public static Vec3 toVec3(Vector vector) {
-        return new Vec3(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
+    //#if MC>10809
+    public static Vec3d toVec3(Vector vector) {
+        return new Vec3d(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
+    //#else
+    //$$public static Vec3 toVec3(Vector vector) {
+    //$$    return new Vec3(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
+    //#endif
+    }
+
+    public static EnumFacing adapt(Direction face) {
+        switch (face) {
+            case NORTH: return EnumFacing.NORTH;
+            case SOUTH: return EnumFacing.SOUTH;
+            case WEST: return EnumFacing.WEST;
+            case EAST: return EnumFacing.EAST;
+            case DOWN: return EnumFacing.DOWN;
+            default: return EnumFacing.UP;
+        }
     }
 
     public static BlockPos toBlockPos(Vector vector) {

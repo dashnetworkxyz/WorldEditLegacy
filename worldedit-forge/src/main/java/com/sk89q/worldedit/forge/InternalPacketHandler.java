@@ -17,30 +17,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+//#if MC>10904
 package com.sk89q.worldedit.forge;
 
-import com.sk89q.worldedit.util.PropertiesConfiguration;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-import java.io.File;
+import com.sk89q.worldedit.forge.net.LeftClickAirEventMessage;
 
-public class ForgeConfiguration extends PropertiesConfiguration {
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
-    public boolean creativeEnable = false;
-    public boolean cheatMode = false;
+public class InternalPacketHandler {
 
-    public ForgeConfiguration(ForgeWorldEdit mod) {
-        super(new File(mod.getWorkingDir() + File.separator + "worldedit.properties"));
-    }
+    private InternalPacketHandler() {}
 
-    @Override
-    protected void loadExtra() {
-        creativeEnable = getBool("use-in-creative", false);
-        cheatMode = getBool("cheat-mode", false);
-    }
+    public static final Charset UTF_8_CHARSET = StandardCharsets.UTF_8;
+    public static SimpleNetworkWrapper CHANNEL;
 
-    @Override
-    public File getWorkingDirectory() {
-        return ForgeWorldEdit.inst.getWorkingDir();
+    public static void init() {
+         CHANNEL = NetworkRegistry.INSTANCE.newSimpleChannel(ForgeWorldEdit.MOD_ID);
+         CHANNEL.registerMessage(LeftClickAirEventMessage.Handler.class, LeftClickAirEventMessage.class, 0, Side.SERVER);
     }
 
 }
+//#endif

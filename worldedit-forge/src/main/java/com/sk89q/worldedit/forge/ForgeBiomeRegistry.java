@@ -19,29 +19,32 @@
 
 package com.sk89q.worldedit.forge;
 
-import com.google.common.collect.HashBiMap;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.biome.BiomeData;
 import com.sk89q.worldedit.world.registry.BiomeRegistry;
 
-import net.minecraft.world.biome.BiomeGenBase;
-
-import javax.annotation.Nullable;
-
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+//#if MC>10809
+import net.minecraft.world.biome.Biome;
+//#else
+//$$import com.google.common.collect.HashBiMap;
+//$$import net.minecraft.world.biome.BiomeGenBase;
+//$$import java.util.Collections;
+//$$import java.util.HashMap;
+//$$import java.util.Map;
+//#endif
 
 /**
  * Provides access to biome data in Forge.
  */
 class ForgeBiomeRegistry implements BiomeRegistry {
-    private static Map<Integer, BiomeGenBase> biomes = Collections.emptyMap();
-    private static Map<Integer, BiomeData> biomeData = Collections.emptyMap();
 
-    @Nullable
+    //#if MC<=10809
+    //$$private static Map<Integer, BiomeGenBase> biomes = Collections.emptyMap();
+    //$$private static Map<Integer, BiomeData> biomeData = Collections.emptyMap();
+    //#endif
+
     @Override
     public BaseBiome createFromId(int id) {
         return new BaseBiome(id);
@@ -50,18 +53,29 @@ class ForgeBiomeRegistry implements BiomeRegistry {
     @Override
     public List<BaseBiome> getBiomes() {
         List<BaseBiome> list = new ArrayList<>();
-        for (int biome : biomes.keySet()) {
-            list.add(new BaseBiome(biome));
+
+        //#if MC>10809
+        for (Biome biome : Biome.REGISTRY) {
+            list.add(new BaseBiome(Biome.getIdForBiome(biome)));
+        //#else
+        //$$for (int biome : biomes.keySet()) {
+        //$$    list.add(new BaseBiome(biome));
+        //#endif
         }
+
         return list;
     }
 
-    @Nullable
     @Override
     public BiomeData getData(BaseBiome biome) {
-        return biomeData.get(biome.getId());
+        //#if MC>10809
+        return new ForgeBiomeData(Biome.getBiome(biome.getId()));
+        //#else
+        //$$return biomeData.get(biome.getId());
+        //#endif
     }
 
+    //#if MC<=10809
     /**
      * Populate the internal static list of biomes.
      *
@@ -69,39 +83,54 @@ class ForgeBiomeRegistry implements BiomeRegistry {
      * calls.</p>
      */
     static void populate() {
-        Map<Integer, BiomeGenBase> biomes = HashBiMap.create();
-        Map<Integer, BiomeData> biomeData = new HashMap<Integer, BiomeData>();
+    //$$    Map<Integer, BiomeGenBase> biomes = HashBiMap.create();
+    //$$    Map<Integer, BiomeData> biomeData = new HashMap<>();
 
-        for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
-            if ((biome == null) || (biomes.containsValue(biome))) {
-                continue;
-            }
-            biomes.put(biome.biomeID, biome);
-            biomeData.put(biome.biomeID, new ForgeBiomeData(biome));
-        }
+    //$$    for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
+    //$$        if ((biome == null) || (biomes.containsValue(biome))) {
+    //$$            continue;
+    //$$        }
 
-        ForgeBiomeRegistry.biomes = biomes;
-        ForgeBiomeRegistry.biomeData = biomeData;
+    //$$        biomes.put(biome.biomeID, biome);
+    //$$        biomeData.put(biome.biomeID, new ForgeBiomeData(biome));
+    //$$    }
+
+    //$$    ForgeBiomeRegistry.biomes = biomes;
+    //$$    ForgeBiomeRegistry.biomeData = biomeData;
     }
+    //#endif
 
     /**
      * Cached biome data information.
      */
     private static class ForgeBiomeData implements BiomeData {
-        private final BiomeGenBase biome;
+
+        //#if MC>10809
+        private final Biome biome;
+        //#else
+        //$$private final BiomeGenBase biome;
+        //#endif
 
         /**
          * Create a new instance.
          *
          * @param biome the base biome
          */
-        private ForgeBiomeData(BiomeGenBase biome) {
+        //#if MC>10809
+        private ForgeBiomeData(Biome biome) {
+        //#else
+        //$$private ForgeBiomeData(BiomeGenBase biome) {
+        //#endif
             this.biome = biome;
         }
 
         @Override
         public String getName() {
-            return biome.biomeName;
+            //#if MC>10809
+            return biome.getBiomeName();
+            //#else
+            //$$return biome.biomeName;
+            //#endif
         }
     }
 

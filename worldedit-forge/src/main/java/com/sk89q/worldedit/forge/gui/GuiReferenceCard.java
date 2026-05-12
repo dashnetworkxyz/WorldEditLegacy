@@ -27,9 +27,9 @@ import org.lwjgl.opengl.GL11;
 
 public class GuiReferenceCard extends GuiScreen {
 
+    private final int backgroundWidth = 256;
+    private final int backgroundHeight = 256;
     private GuiButton closeButton;
-    private int backgroundWidth = 256;
-    private int backgroundHeight = 256;
 
     @Override
     public void initGui() {
@@ -50,7 +50,11 @@ public class GuiReferenceCard extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton button) {
         if (button.id == 0) {
-            this.mc.thePlayer.closeScreen();
+            //#if MC>10904
+            this.mc.player.closeScreen();
+            //#else
+            //$$this.mc.thePlayer.closeScreen();
+            //#endif
         }
     }
 

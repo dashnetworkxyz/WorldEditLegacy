@@ -25,7 +25,19 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.IProjectile;
-import net.minecraft.entity.item.*;
+//#if MC>11102
+import net.minecraft.entity.MultiPartEntityPart;
+//#endif
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.item.EntityBoat;
+import net.minecraft.entity.item.EntityEnderEye;
+import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -136,6 +148,11 @@ public class ForgeEntityType implements EntityType {
 
     @Override
     public boolean isPasteable() {
-        return !(entity instanceof EntityPlayerMP);
+        //#if MC>11102
+        return !(entity instanceof EntityPlayerMP || entity instanceof MultiPartEntityPart);
+        //#else
+        //$$return !(entity instanceof EntityPlayerMP);
+        //#endif
     }
+
 }

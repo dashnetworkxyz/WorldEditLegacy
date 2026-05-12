@@ -25,10 +25,13 @@ import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
 
 public class CommandWrapper extends CommandBase {
+
     private CommandMapping command;
 
     protected CommandWrapper(CommandMapping command) {
@@ -36,20 +39,36 @@ public class CommandWrapper extends CommandBase {
     }
 
     @Override
-    public String getCommandName() {
+    //#if MC>10904
+    public String getName() {
+    //#else
+    //$$public String getCommandName() {
+    //#endif
         return command.getPrimaryAlias();
     }
 
     @Override
-    public List<String> getCommandAliases() {
+    //#if MC>10904
+    public List<String> getAliases() {
+    //#else
+    //$$public List<String> getCommandAliases() {
+    //#endif
         return Arrays.asList(command.getAllAliases());
     }
 
     @Override
-    public void processCommand(ICommandSender var1, String[] var2) {}
+    //#if MC>10809
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) {}
+    //#else
+    //$$public void processCommand(ICommandSender sender, String[] args) {}
+    //#endif
 
     @Override
-    public String getCommandUsage(ICommandSender icommandsender) {
+    //#if MC>10904
+    public String getUsage(ICommandSender icommandsender) {
+    //#else
+    //$$public String getCommandUsage(ICommandSender icommandsender) {
+    //#endif
         return "/" + command.getPrimaryAlias() + " " + command.getDescription().getUsage();
     }
 
@@ -59,7 +78,11 @@ public class CommandWrapper extends CommandBase {
     }
 
     @Override
-    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+    //#if MC>10809
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+    //#else
+    //$$public boolean canCommandSenderUseCommand(ICommandSender sender) {
+    //#endif
         return true;
     }
 
@@ -71,4 +94,5 @@ public class CommandWrapper extends CommandBase {
             return super.compareTo(o);
         }
     }
+
 }

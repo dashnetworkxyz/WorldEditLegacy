@@ -46,29 +46,34 @@ class ForgeEntity implements Entity {
     @Override
     public BaseEntity getState() {
         net.minecraft.entity.Entity entity = entityRef.get();
+
         if (entity != null) {
             String id = EntityList.getEntityString(entity);
+
             if (id != null) {
                 NBTTagCompound tag = new NBTTagCompound();
                 entity.writeToNBT(tag);
                 return new BaseEntity(id, NBTConverter.fromNative(tag));
-            } else {
-                return null;
             }
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     @Override
     public Location getLocation() {
         net.minecraft.entity.Entity entity = entityRef.get();
+
         if (entity != null) {
             Vector position = new Vector(entity.posX, entity.posY, entity.posZ);
             float yaw = entity.rotationYaw;
             float pitch = entity.rotationPitch;
 
-            return new Location(ForgeAdapter.adapt(entity.worldObj), position, yaw, pitch);
+            //#if MC>10904
+            return new Location(ForgeAdapter.adapt(entity.world), position, yaw, pitch);
+            //#else
+            //$$return new Location(ForgeAdapter.adapt(entity.worldObj), position, yaw, pitch);
+            //#endif
         } else {
             return new Location(NullWorld.getInstance());
         }
@@ -77,8 +82,13 @@ class ForgeEntity implements Entity {
     @Override
     public Extent getExtent() {
         net.minecraft.entity.Entity entity = entityRef.get();
+
         if (entity != null) {
-            return ForgeAdapter.adapt(entity.worldObj);
+            //#if MC>10904
+            return ForgeAdapter.adapt(entity.world);
+            //#else
+            //$$return ForgeAdapter.adapt(entity.worldObj);
+            //#endif
         } else {
             return NullWorld.getInstance();
         }
@@ -87,9 +97,11 @@ class ForgeEntity implements Entity {
     @Override
     public boolean remove() {
         net.minecraft.entity.Entity entity = entityRef.get();
+
         if (entity != null) {
             entity.setDead();
         }
+
         return true;
     }
 
@@ -98,14 +110,13 @@ class ForgeEntity implements Entity {
     @Override
     public <T> T getFacet(Class<? extends T> cls) {
         net.minecraft.entity.Entity entity = entityRef.get();
+
         if (entity != null) {
             if (EntityType.class.isAssignableFrom(cls)) {
                 return (T) new ForgeEntityType(entity);
-            } else {
-                return null;
             }
-        } else {
-            return null;
         }
+
+        return null;
     }
 }

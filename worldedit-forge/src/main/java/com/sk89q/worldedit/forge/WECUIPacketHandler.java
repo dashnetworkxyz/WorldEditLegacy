@@ -28,7 +28,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.ThreadQuickExitException;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
+//#if MC>10809
+import net.minecraft.network.play.server.SPacketCustomPayload;
+//#else
+//$$import net.minecraft.network.play.server.S3FPacketCustomPayload;
+//#endif
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
@@ -36,6 +40,7 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketE
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 public class WECUIPacketHandler {
+
     public static final Charset UTF_8_CHARSET = StandardCharsets.UTF_8;
     public static FMLEventChannel WECUI_CHANNEL;
     
@@ -46,7 +51,11 @@ public class WECUIPacketHandler {
 
     @SubscribeEvent
     public void onPacketData(ServerCustomPacketEvent event) {
-        if (event.packet.channel().equals(ForgeWorldEdit.CUI_PLUGIN_CHANNEL)) {
+        //#if MC>10809
+        if (event.getPacket().channel().equals(ForgeWorldEdit.CUI_PLUGIN_CHANNEL)) {
+        //#else
+        //$$if (event.packet.channel().equals(ForgeWorldEdit.CUI_PLUGIN_CHANNEL)) {
+        //#endif
             EntityPlayerMP player = getPlayerFromEvent(event);
             LocalSession session = ForgeWorldEdit.inst.getSession(player);
 
@@ -54,7 +63,11 @@ public class WECUIPacketHandler {
                 return;
             }
 
-            String text = event.packet.payload().toString(UTF_8_CHARSET);
+            //#if MC>10809
+            String text = event.getPacket().payload().toString(UTF_8_CHARSET);
+            //#else
+            //$$String text = event.packet.payload().toString(UTF_8_CHARSET);
+            //#endif
             session.handleCUIInitializationMessage(text);
             session.describeCUI(ForgeWorldEdit.inst.wrap(player));
         }
@@ -63,11 +76,24 @@ public class WECUIPacketHandler {
     @SubscribeEvent
     public void callProcessPacket(ClientCustomPacketEvent event) {
         try {
-            new S3FPacketCustomPayload(event.packet.channel(), new PacketBuffer(event.packet.payload())).processPacket(event.handler);
+            //#if MC>10809
+            new SPacketCustomPayload(event.getPacket().channel(), new PacketBuffer(event.getPacket().payload())).processPacket(event.getHandler());
+            //#else
+            //$$new S3FPacketCustomPayload(event.packet.channel(), new PacketBuffer(event.packet.payload())).processPacket(event.handler);
+            //#endif
         } catch (ThreadQuickExitException ignored) {}
     }
 
     private static EntityPlayerMP getPlayerFromEvent(ServerCustomPacketEvent event) {
-        return ((NetHandlerPlayServer) event.handler).playerEntity;
+        //#if MC>11002
+        return ((NetHandlerPlayServer) event.getHandler()).player;
+        //#else
+            //#if MC>10809
+            //$$return ((NetHandlerPlayServer) event.getHandler()).playerEntity;
+            //#else
+            //$$return ((NetHandlerPlayServer) event.handler).playerEntity;
+            //#endif
+        //#endif
     }
+
 }

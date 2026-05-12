@@ -19,11 +19,16 @@
 
 package com.sk89q.worldedit.forge;
 
+import org.spongepowered.api.entity.living.player.Player;
+
 import net.minecraft.command.ICommand;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.WorldSettings.GameType;
+//#if MC>10904
+import net.minecraft.world.GameType;
+//#else
+//$$import net.minecraft.world.WorldSettings.GameType;
+//#endif
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import org.spongepowered.api.entity.living.player.Player;
 
 public interface ForgePermissionsProvider {
 
@@ -43,8 +48,13 @@ public interface ForgePermissionsProvider {
         public boolean hasPermission(EntityPlayerMP player, String permission) {
             ForgeConfiguration configuration = platform.getConfiguration();
             return configuration.cheatMode ||
-                    FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().canSendCommands(player.getGameProfile()) ||
-                    (configuration.creativeEnable && player.theItemInWorldManager.getGameType() == GameType.CREATIVE);
+                    //#if MC>10809
+                    FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().canSendCommands(player.getGameProfile()) ||
+                    (configuration.creativeEnable && player.interactionManager.getGameType() == GameType.CREATIVE);
+                    //#else
+                    //$$FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().canSendCommands(player.getGameProfile()) ||
+                    //$$(configuration.creativeEnable && player.theItemInWorldManager.getGameType() == GameType.CREATIVE);
+                    //#endif
         }
 
         @Override
@@ -63,4 +73,5 @@ public interface ForgePermissionsProvider {
 
         }
     }
+
 }

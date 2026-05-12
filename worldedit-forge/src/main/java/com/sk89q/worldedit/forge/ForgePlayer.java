@@ -30,26 +30,29 @@ import com.sk89q.worldedit.internal.cui.CUIEvent;
 import com.sk89q.worldedit.session.SessionKey;
 import com.sk89q.worldedit.util.Location;
 
+import io.netty.buffer.Unpooled;
+import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
-import net.minecraft.util.ChatComponentText;
-import io.netty.buffer.Unpooled;
-import net.minecraft.util.EnumChatFormatting;
-
-import javax.annotation.Nullable;
-
-import java.util.UUID;
+//#if MC>10809
+import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+//#else
+//$$import net.minecraft.network.play.server.S3FPacketCustomPayload;
+//$$import net.minecraft.util.ChatComponentText;
+//$$import net.minecraft.util.EnumChatFormatting;
+//#endif
 
 public class ForgePlayer extends AbstractPlayerActor {
 
-    private final ForgePlatform platform;
     private final EntityPlayerMP player;
 
-    protected ForgePlayer(ForgePlatform platform, EntityPlayerMP player) {
-        this.platform = platform;
+    protected ForgePlayer(EntityPlayerMP player) {
         this.player = player;
         ThreadSafeCache.getInstance().getOnlineIds().add(getUniqueId());
     }
@@ -61,8 +64,12 @@ public class ForgePlayer extends AbstractPlayerActor {
 
     @Override
     public int getItemInHand() {
-        ItemStack is = this.player.getCurrentEquippedItem();
-        return is == null ? 0 : Item.getIdFromItem(is.getItem());
+        //#if MC>10809
+        ItemStack is = this.player.getHeldItem(EnumHand.MAIN_HAND);
+        //#else
+        //$$ItemStack is = this.player.getHeldItem();
+        //#endif
+        return Item.getIdFromItem(is.getItem());
     }
 
     @Override
@@ -79,20 +86,37 @@ public class ForgePlayer extends AbstractPlayerActor {
     public Location getLocation() {
         Vector position = new Vector(this.player.posX, this.player.posY, this.player.posZ);
         return new Location(
-                ForgeWorldEdit.inst.getWorld(this.player.worldObj),
+                //#if MC>10904
+                ForgeWorldEdit.inst.getWorld(this.player.world),
+                //#else
+                //$$ForgeWorldEdit.inst.getWorld(this.player.worldObj),
+                //#endif
                 position,
                 this.player.rotationYaw,
                 this.player.rotationPitch);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public WorldVector getPosition() {
-        return new WorldVector(LocalWorldAdapter.adapt(ForgeWorldEdit.inst.getWorld(this.player.worldObj)), this.player.posX, this.player.posY, this.player.posZ);
+        return new WorldVector(LocalWorldAdapter.adapt(ForgeWorldEdit.inst.getWorld(
+                //#if MC>10904
+                this.player.world
+                //#else
+                //$$this.player.worldObj
+                //#endif
+        )), this.player.posX, this.player.posY, this.player.posZ);
     }
 
     @Override
     public com.sk89q.worldedit.world.World getWorld() {
-        return ForgeWorldEdit.inst.getWorld(this.player.worldObj);
+        return ForgeWorldEdit.inst.getWorld(
+                //#if MC>10904
+                this.player.world
+                //#else
+                //$$this.player.worldObj
+                //#endif
+        );
     }
 
     @Override
@@ -118,43 +142,85 @@ public class ForgePlayer extends AbstractPlayerActor {
             send = send + "|" + StringUtil.joinString(params, "|");
         }
         PacketBuffer buffer = new PacketBuffer(Unpooled.copiedBuffer(send.getBytes(WECUIPacketHandler.UTF_8_CHARSET)));
-        S3FPacketCustomPayload packet = new S3FPacketCustomPayload(ForgeWorldEdit.CUI_PLUGIN_CHANNEL, buffer);
-        this.player.playerNetServerHandler.sendPacket(packet);
+        //#if MC>10809
+        SPacketCustomPayload packet = new SPacketCustomPayload(ForgeWorldEdit.CUI_PLUGIN_CHANNEL, buffer);
+        this.player.connection.sendPacket(packet);
+        //#else
+        //$$S3FPacketCustomPayload packet = new S3FPacketCustomPayload(ForgeWorldEdit.CUI_PLUGIN_CHANNEL, buffer);
+        //$$this.player.playerNetServerHandler.sendPacket(packet);
+        //#endif
     }
 
     @Override
     public void printRaw(String msg) {
         for (String part : msg.split("\n")) {
-            this.player.addChatMessage(new ChatComponentText(part));
+            //#if MC>10904
+            this.player.sendMessage(new TextComponentString(part));
+            //#else
+                //#if MC>10809
+                //$$this.player.addChatMessage(new TextComponentString(part));
+                //#else
+                //$$this.player.addChatMessage(new ChatComponentText(part));
+                //#endif
+            //#endif
         }
     }
 
     @Override
     public void printDebug(String msg) {
-        sendColorized(msg, EnumChatFormatting.GRAY);
+        //#if MC>10809
+        sendColorized(msg, TextFormatting.GRAY);
+        //#else
+        //$$sendColorized(msg, EnumChatFormatting.GRAY);
+        //#endif
     }
 
     @Override
     public void print(String msg) {
-        sendColorized(msg, EnumChatFormatting.LIGHT_PURPLE);
+        //#if MC>10809
+        sendColorized(msg, TextFormatting.LIGHT_PURPLE);
+        //#else
+        //$$sendColorized(msg, EnumChatFormatting.LIGHT_PURPLE);
+        //#endif
     }
 
     @Override
     public void printError(String msg) {
-        sendColorized(msg, EnumChatFormatting.RED);
+        //#if MC>10809
+        sendColorized(msg, TextFormatting.RED);
+        //#else
+        //$$sendColorized(msg, EnumChatFormatting.RED);
+        //#endif
     }
 
-    private void sendColorized(String msg, EnumChatFormatting formatting) {
+    //#if MC>10809
+    private void sendColorized(String msg, TextFormatting formatting) {
+    //#else
+    //$$private void sendColorized(String msg, EnumChatFormatting formatting) {
+    //#endif
         for (String part : msg.split("\n")) {
-            ChatComponentText component = new ChatComponentText(part);
-            component.getChatStyle().setColor(formatting);
-            this.player.addChatMessage(component);
+            //#if MC>10809
+            TextComponentString component = new TextComponentString(part);
+            component.getStyle().setColor(formatting);
+            //#else
+            //$$ChatComponentText component = new ChatComponentText(part);
+            //$$component.getChatStyle().setColor(formatting);
+            //#endif
+            //#if MC>10904
+            this.player.sendMessage(component);
+            //#else
+            //$$this.player.addChatMessage(component);
+            //#endif
         }
     }
 
     @Override
     public void setPosition(Vector pos, float pitch, float yaw) {
-        this.player.playerNetServerHandler.setPlayerLocation(pos.getX(), pos.getY(), pos.getZ(), yaw, pitch);
+        //#if MC>10809
+        this.player.connection.setPlayerLocation(pos.getX(), pos.getY(), pos.getZ(), yaw, pitch);
+        //#else
+        //$$this.player.playerNetServerHandler.setPlayerLocation(pos.getX(), pos.getY(), pos.getZ(), yaw, pitch);
+        //#endif
     }
 
     @Override

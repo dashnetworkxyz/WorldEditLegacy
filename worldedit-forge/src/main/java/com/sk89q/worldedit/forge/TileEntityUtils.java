@@ -21,15 +21,17 @@ package com.sk89q.worldedit.forge;
 
 import com.sk89q.worldedit.Vector;
 
+import java.lang.reflect.Constructor;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+//#if MC>10809
+import net.minecraft.util.math.BlockPos;
+//#else
+//$$import net.minecraft.util.BlockPos;
+//#endif
 import net.minecraft.world.World;
-
-import javax.annotation.Nullable;
-
-import java.lang.reflect.Constructor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -38,8 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class TileEntityUtils {
 
-    private TileEntityUtils() {
-    }
+    private TileEntityUtils() {}
 
     /**
      * Update the given tag compound with position information.
@@ -98,7 +99,16 @@ final class TileEntityUtils {
     static void setTileEntity(World world, Vector position, @Nullable NBTTagCompound tag) {
         if (tag != null) {
             updateForSet(tag, position);
-            TileEntity tileEntity = TileEntity.createAndLoadEntity(tag);
+            //#if MC>10904
+            TileEntity tileEntity = TileEntity.create(world, tag);
+            //#else
+                //#if MC>10809
+                //$$TileEntity tileEntity = TileEntity.create(tag);
+                //#else
+                //$$TileEntity tileEntity = TileEntity.createAndLoadEntity(tag);
+                //#endif
+            //#endif
+
             if (tileEntity != null) {
                 world.setTileEntity(new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ()), tileEntity);
             }
@@ -116,6 +126,7 @@ final class TileEntityUtils {
     @Nullable
     static TileEntity constructTileEntity(World world, Vector position, Class<? extends TileEntity> clazz) {
         Constructor<? extends TileEntity> baseConstructor;
+
         try {
             baseConstructor = clazz.getConstructor(); // creates "blank" TE
         } catch (Throwable e) {
@@ -123,8 +134,8 @@ final class TileEntityUtils {
         }
 
         TileEntity genericTE;
+
         try {
-            // Downcast here for return while retaining the type
             genericTE = baseConstructor.newInstance();
         } catch (Throwable e) {
             return null;
