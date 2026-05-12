@@ -66,6 +66,7 @@ preprocess {
     outputs.upToDateWhen { target.get().exists() } // https://github.com/raydac/java-comment-preprocessor/issues/42
 
     sources = sourceSets.main.java.srcDirs
+    keepLines = false
     fileExtensions = ['java']
     actionPreprocessorExtensions = ["com.igormaznitsa.jcp.extension.LogPreprocessorExtension"]
     vars = ['MC': versions[minecraftVersion].compare]
