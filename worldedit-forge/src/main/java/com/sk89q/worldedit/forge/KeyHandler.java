@@ -22,6 +22,8 @@ package com.sk89q.worldedit.forge;
 import com.sk89q.worldedit.forge.gui.GuiHandler;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -40,8 +42,16 @@ public class KeyHandler {
 
     @SubscribeEvent
     public void onKey(KeyInputEvent evt) {
-        if (mc.player != null && mc.world != null && mainKey.isPressed()) {
-            mc.player.openGui(ForgeWorldEdit.inst, GuiHandler.REFERENCE_ID, mc.world, 0, 0, 0);
+        //#if MC>10904
+        //$$EntityPlayerSP player = mc.player;
+        //$$WorldClient world = mc.world;
+        //#else
+        EntityPlayerSP player = mc.thePlayer;
+        WorldClient world = mc.theWorld;
+        //#endif
+
+        if (player != null && world != null && mainKey.isPressed()) {
+            player.openGui(ForgeWorldEdit.inst, GuiHandler.REFERENCE_ID, world, 0, 0, 0);
         }
     }
 

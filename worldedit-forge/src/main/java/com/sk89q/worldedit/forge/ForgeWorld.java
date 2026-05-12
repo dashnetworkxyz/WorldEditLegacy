@@ -266,7 +266,11 @@ public class ForgeWorld extends AbstractWorld {
 
         EntityItem entity = new EntityItem(getWorld(), position.getX(), position.getY(), position.getZ(), ForgeWorldEdit.toForgeItemStack(item));
         entity.setPickupDelay(10);
-        getWorld().spawnEntity(entity);
+        //#if MC>10904
+        //$$getWorld().spawnEntity(entity);
+        //#else
+        getWorld().spawnEntityInWorld(entity);
+        //#endif
     }
 
     @Override
@@ -454,7 +458,11 @@ public class ForgeWorld extends AbstractWorld {
 
             createdEntity.setLocationAndAngles(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
-            world.spawnEntity(createdEntity);
+            //#if MC>10904
+            //$$world.spawnEntity(createdEntity);
+            //#else
+            world.spawnEntityInWorld(createdEntity);
+            //#endif
             return new ForgeEntity(createdEntity);
         } else {
             return null;

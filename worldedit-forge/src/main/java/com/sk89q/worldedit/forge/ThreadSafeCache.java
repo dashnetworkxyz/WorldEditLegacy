@@ -63,7 +63,11 @@ public class ThreadSafeCache {
                 return;
             }
 
-            for (EntityPlayerMP player : server.getPlayerList().getPlayers()) {
+            //#if MC>10904
+            //$$for (EntityPlayerMP player : server.getPlayerList().getPlayers()) {
+            //#else
+            for (EntityPlayerMP player : server.getPlayerList().getPlayerList()) {
+            //#endif
                 if (player != null) {
                     onlineIds.add(player.getUniqueID());
                 }

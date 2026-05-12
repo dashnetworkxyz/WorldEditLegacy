@@ -211,7 +211,11 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
         List<Actor> users = new ArrayList<>();
         PlayerList scm = server.getPlayerList();
 
-        for (EntityPlayerMP entity : scm.getPlayers()) {
+        //#if MC>10904
+        //$$for (EntityPlayerMP entity : scm.getPlayers()) {
+        //#else
+        for (EntityPlayerMP entity : scm.getPlayerList()) {
+        //#endif
             if (entity != null) {
                 users.add(new ForgePlayer(entity));
             }

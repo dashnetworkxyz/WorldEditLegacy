@@ -39,12 +39,20 @@ public class CommandWrapper extends CommandBase {
     }
 
     @Override
-    public String getName() {
+    //#if MC>10904
+    //$$public String getName() {
+    //#else
+    public String getCommandName() {
+    //#endif
         return command.getPrimaryAlias();
     }
 
     @Override
-    public List<String> getAliases() {
+    //#if MC>10904
+    //$$public List<String> getAliases() {
+    //#else
+    public List<String> getCommandAliases() {
+    //#endif
         return Arrays.asList(command.getAllAliases());
     }
 
@@ -52,7 +60,11 @@ public class CommandWrapper extends CommandBase {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {}
 
     @Override
-    public String getUsage(ICommandSender icommandsender) {
+    //#if MC>10904
+    //$$public String getUsage(ICommandSender icommandsender) {
+    //#else
+    public String getCommandUsage(ICommandSender icommandsender) {
+    //#endif
         return "/" + command.getPrimaryAlias() + " " + command.getDescription().getUsage();
     }
 

@@ -76,7 +76,11 @@ public class ForgePlayer extends AbstractPlayerActor {
     public Location getLocation() {
         Vector position = new Vector(this.player.posX, this.player.posY, this.player.posZ);
         return new Location(
-                ForgeWorldEdit.inst.getWorld(this.player.world),
+                //#if MC>10904
+                //$$ForgeWorldEdit.inst.getWorld(this.player.world),
+                //#else
+                ForgeWorldEdit.inst.getWorld(this.player.worldObj),
+                //#endif
                 position,
                 this.player.rotationYaw,
                 this.player.rotationPitch);
@@ -85,12 +89,24 @@ public class ForgePlayer extends AbstractPlayerActor {
     @SuppressWarnings("deprecation")
     @Override
     public WorldVector getPosition() {
-        return new WorldVector(LocalWorldAdapter.adapt(ForgeWorldEdit.inst.getWorld(this.player.world)), this.player.posX, this.player.posY, this.player.posZ);
+        return new WorldVector(LocalWorldAdapter.adapt(ForgeWorldEdit.inst.getWorld(
+                //#if MC>10904
+                //$$this.player.world
+                //#else
+                this.player.worldObj
+                //#endif
+        )), this.player.posX, this.player.posY, this.player.posZ);
     }
 
     @Override
     public com.sk89q.worldedit.world.World getWorld() {
-        return ForgeWorldEdit.inst.getWorld(this.player.world);
+        return ForgeWorldEdit.inst.getWorld(
+                //#if MC>10904
+                //$$this.player.world
+                //#else
+                this.player.worldObj
+                //#endif
+        );
     }
 
     @Override
@@ -123,7 +139,11 @@ public class ForgePlayer extends AbstractPlayerActor {
     @Override
     public void printRaw(String msg) {
         for (String part : msg.split("\n")) {
-            this.player.sendMessage(new TextComponentString(part));
+            //#if MC>10904
+            //$$this.player.sendMessage(new TextComponentString(part));
+            //#else
+            this.player.addChatMessage(new TextComponentString(part));
+            //#endif
         }
     }
 
@@ -146,7 +166,11 @@ public class ForgePlayer extends AbstractPlayerActor {
         for (String part : msg.split("\n")) {
             TextComponentString component = new TextComponentString(part);
             component.getStyle().setColor(formatting);
-            this.player.sendMessage(component);
+            //#if MC>10904
+            //$$this.player.sendMessage(component);
+            //#else
+            this.player.addChatMessage(component);
+            //#endif
         }
     }
 

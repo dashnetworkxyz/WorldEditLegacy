@@ -136,10 +136,18 @@ public class ForgeWorldEdit {
     @SubscribeEvent
     public void onCommandEvent(CommandEvent event) {
         if ((event.getSender() instanceof EntityPlayerMP)) {
-            if (((EntityPlayerMP) event.getSender()).world.isRemote) return;
+            //#if MC>10904
+            //$$if (((EntityPlayerMP) event.getSender()).world.isRemote) return;
+            //#else
+            if (((EntityPlayerMP) event.getSender()).worldObj.isRemote) return;
+            //#endif
             String[] split = new String[event.getParameters().length + 1];
             System.arraycopy(event.getParameters(), 0, split, 1, event.getParameters().length);
-            split[0] = event.getCommand().getName();
+            //#if MC>10904
+            //$$split[0] = event.getCommand().getName();
+            //#else
+            split[0] = event.getCommand().getCommandName();
+            //#endif
             com.sk89q.worldedit.event.platform.CommandEvent weEvent =
                     new com.sk89q.worldedit.event.platform.CommandEvent(wrap((EntityPlayerMP) event.getSender()), Joiner.on(" ").join(split));
             WorldEdit.getInstance().getEventBus().post(weEvent);
@@ -168,13 +176,21 @@ public class ForgeWorldEdit {
                 event instanceof PlayerInteractEvent.RightClickBlock
                         && ((PlayerInteractEvent.RightClickBlock) event)
                                 .getUseItem() == Result.DENY;
-        if (isLeftDeny || isRightDeny || event.getEntity().world.isRemote) {
+        //#if MC>10904
+        //$$if (isLeftDeny || isRightDeny || event.getEntity().world.isRemote) {
+        //#else
+        if (isLeftDeny || isRightDeny || event.getEntity().worldObj.isRemote) {
+        //#endif
             return;
         }
 
         WorldEdit we = WorldEdit.getInstance();
         ForgePlayer player = wrap((EntityPlayerMP) event.getEntityPlayer());
-        ForgeWorld world = getWorld(event.getEntityPlayer().world);
+        //#if MC>10904
+        //$$ForgeWorld world = getWorld(event.getEntityPlayer().world);
+        //#else
+        ForgeWorld world = getWorld(event.getEntityPlayer().worldObj);
+        //#endif
 
         if (event instanceof LeftClickEmpty) {
             we.handleArmSwing(player); // this event cannot be canceled

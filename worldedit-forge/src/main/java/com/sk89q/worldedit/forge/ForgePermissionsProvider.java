@@ -23,7 +23,11 @@ import org.spongepowered.api.entity.living.player.Player;
 
 import net.minecraft.command.ICommand;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.GameType;
+//#if MC>10904
+//$$import net.minecraft.world.GameType;
+//#else
+import net.minecraft.world.WorldSettings.GameType;
+//#endif
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public interface ForgePermissionsProvider {

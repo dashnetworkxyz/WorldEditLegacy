@@ -69,7 +69,11 @@ class ForgeEntity implements Entity {
             float yaw = entity.rotationYaw;
             float pitch = entity.rotationPitch;
 
-            return new Location(ForgeAdapter.adapt(entity.world), position, yaw, pitch);
+            //#if MC>10904
+            //$$return new Location(ForgeAdapter.adapt(entity.world), position, yaw, pitch);
+            //#else
+            return new Location(ForgeAdapter.adapt(entity.worldObj), position, yaw, pitch);
+            //#endif
         } else {
             return new Location(NullWorld.getInstance());
         }
@@ -80,7 +84,11 @@ class ForgeEntity implements Entity {
         net.minecraft.entity.Entity entity = entityRef.get();
 
         if (entity != null) {
-            return ForgeAdapter.adapt(entity.world);
+            //#if MC>10904
+            //$$return ForgeAdapter.adapt(entity.world);
+            //#else
+            return ForgeAdapter.adapt(entity.worldObj);
+            //#endif
         } else {
             return NullWorld.getInstance();
         }
