@@ -39,6 +39,7 @@ import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
+import com.sk89q.worldedit.regions.selector.ExtendingCuboidRegionSelector;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.command.binding.Switch;
 import com.sk89q.worldedit.util.command.parametric.Optional;
@@ -163,7 +164,14 @@ public class ClipboardCommands {
             Vector clipboardOffset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
             Vector realTo = to.add(holder.getTransform().apply(clipboardOffset));
             Vector max = realTo.add(holder.getTransform().apply(region.getMaximumPoint().subtract(region.getMinimumPoint())));
-            RegionSelector selector = new CuboidRegionSelector(player.getWorld(), realTo, max);
+            RegionSelector selector;
+
+            if (session.getRegionSelector(player.getWorld()) instanceof ExtendingCuboidRegionSelector) {
+                selector = new ExtendingCuboidRegionSelector(player.getWorld(), realTo, max);
+            } else {
+                selector = new CuboidRegionSelector(player.getWorld(), realTo, max);
+            }
+
             session.setRegionSelector(player.getWorld(), selector);
             selector.learnChanges();
             selector.explainRegionAdjust(player, session);
