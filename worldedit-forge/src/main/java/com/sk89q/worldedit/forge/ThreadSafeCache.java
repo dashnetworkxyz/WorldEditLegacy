@@ -55,19 +55,19 @@ public class ThreadSafeCache {
         long now = System.currentTimeMillis();
 
         if (now - lastRefresh > REFRESH_DELAY) {
-            Set<UUID> onlineIds = new HashSet<>();
+            Set<UUID> onlineIds = new HashSet<UUID>();
             
             MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-            if (server == null || server.getConfigurationManager() == null) {
+            if (server == null) {
                 return;
             }
-            for (EntityPlayerMP player : FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().playerEntityList) {
+            for (EntityPlayerMP player : server.getPlayerList().getPlayers()) {
                 if (player != null) {
                     onlineIds.add(player.getUniqueID());
                 }
             }
 
-            this.onlineIds = new CopyOnWriteArraySet<>(onlineIds);
+            this.onlineIds = new CopyOnWriteArraySet<UUID>(onlineIds);
 
             lastRefresh = now;
         }

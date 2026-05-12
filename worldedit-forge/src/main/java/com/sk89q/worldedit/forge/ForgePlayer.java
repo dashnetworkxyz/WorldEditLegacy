@@ -30,26 +30,23 @@ import com.sk89q.worldedit.internal.cui.CUIEvent;
 import com.sk89q.worldedit.session.SessionKey;
 import com.sk89q.worldedit.util.Location;
 
+import io.netty.buffer.Unpooled;
+import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
-import net.minecraft.util.ChatComponentText;
-import io.netty.buffer.Unpooled;
-import net.minecraft.util.EnumChatFormatting;
-
-import javax.annotation.Nullable;
-
-import java.util.UUID;
+import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 
 public class ForgePlayer extends AbstractPlayerActor {
 
-    private final ForgePlatform platform;
     private final EntityPlayerMP player;
 
-    protected ForgePlayer(ForgePlatform platform, EntityPlayerMP player) {
-        this.platform = platform;
+    protected ForgePlayer(EntityPlayerMP player) {
         this.player = player;
         ThreadSafeCache.getInstance().getOnlineIds().add(getUniqueId());
     }
@@ -61,7 +58,7 @@ public class ForgePlayer extends AbstractPlayerActor {
 
     @Override
     public int getItemInHand() {
-        ItemStack is = this.player.getCurrentEquippedItem();
+        ItemStack is = this.player.getHeldItem(EnumHand.MAIN_HAND);
         return is == null ? 0 : Item.getIdFromItem(is.getItem());
     }
 
@@ -79,20 +76,21 @@ public class ForgePlayer extends AbstractPlayerActor {
     public Location getLocation() {
         Vector position = new Vector(this.player.posX, this.player.posY, this.player.posZ);
         return new Location(
-                ForgeWorldEdit.inst.getWorld(this.player.worldObj),
+                ForgeWorldEdit.inst.getWorld(this.player.world),
                 position,
                 this.player.rotationYaw,
                 this.player.rotationPitch);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public WorldVector getPosition() {
-        return new WorldVector(LocalWorldAdapter.adapt(ForgeWorldEdit.inst.getWorld(this.player.worldObj)), this.player.posX, this.player.posY, this.player.posZ);
+        return new WorldVector(LocalWorldAdapter.adapt(ForgeWorldEdit.inst.getWorld(this.player.world)), this.player.posX, this.player.posY, this.player.posZ);
     }
 
     @Override
     public com.sk89q.worldedit.world.World getWorld() {
-        return ForgeWorldEdit.inst.getWorld(this.player.worldObj);
+        return ForgeWorldEdit.inst.getWorld(this.player.world);
     }
 
     @Override
@@ -118,43 +116,43 @@ public class ForgePlayer extends AbstractPlayerActor {
             send = send + "|" + StringUtil.joinString(params, "|");
         }
         PacketBuffer buffer = new PacketBuffer(Unpooled.copiedBuffer(send.getBytes(WECUIPacketHandler.UTF_8_CHARSET)));
-        S3FPacketCustomPayload packet = new S3FPacketCustomPayload(ForgeWorldEdit.CUI_PLUGIN_CHANNEL, buffer);
-        this.player.playerNetServerHandler.sendPacket(packet);
+        SPacketCustomPayload packet = new SPacketCustomPayload(ForgeWorldEdit.CUI_PLUGIN_CHANNEL, buffer);
+        this.player.connection.sendPacket(packet);
     }
 
     @Override
     public void printRaw(String msg) {
         for (String part : msg.split("\n")) {
-            this.player.addChatMessage(new ChatComponentText(part));
+            this.player.sendMessage(new TextComponentString(part));
         }
     }
 
     @Override
     public void printDebug(String msg) {
-        sendColorized(msg, EnumChatFormatting.GRAY);
+        sendColorized(msg, TextFormatting.GRAY);
     }
 
     @Override
     public void print(String msg) {
-        sendColorized(msg, EnumChatFormatting.LIGHT_PURPLE);
+        sendColorized(msg, TextFormatting.LIGHT_PURPLE);
     }
 
     @Override
     public void printError(String msg) {
-        sendColorized(msg, EnumChatFormatting.RED);
+        sendColorized(msg, TextFormatting.RED);
     }
 
-    private void sendColorized(String msg, EnumChatFormatting formatting) {
+    private void sendColorized(String msg, TextFormatting formatting) {
         for (String part : msg.split("\n")) {
-            ChatComponentText component = new ChatComponentText(part);
-            component.getChatStyle().setColor(formatting);
-            this.player.addChatMessage(component);
+            TextComponentString component = new TextComponentString(part);
+            component.getStyle().setColor(formatting);
+            this.player.sendMessage(component);
         }
     }
 
     @Override
     public void setPosition(Vector pos, float pitch, float yaw) {
-        this.player.playerNetServerHandler.setPlayerLocation(pos.getX(), pos.getY(), pos.getZ(), yaw, pitch);
+        this.player.connection.setPlayerLocation(pos.getX(), pos.getY(), pos.getZ(), yaw, pitch);
     }
 
     @Override

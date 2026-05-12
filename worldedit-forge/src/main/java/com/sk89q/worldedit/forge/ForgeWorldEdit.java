@@ -28,6 +28,7 @@ import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.event.platform.PlatformReadyEvent;
 import com.sk89q.worldedit.extension.platform.Platform;
+import com.sk89q.worldedit.forge.net.LeftClickAirEventMessage;
 import com.sk89q.worldedit.internal.LocalWorldAdapter;
 
 import java.io.File;
@@ -39,6 +40,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickEmpty;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -94,6 +96,7 @@ public class ForgeWorldEdit {
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(this);
         WECUIPacketHandler.init();
+        InternalPacketHandler.init();
         proxy.registerHandlers();
     }
 
@@ -108,8 +111,6 @@ public class ForgeWorldEdit {
             logger.warn("FMLServerStartingEvent occurred when FMLServerStoppingEvent hasn't");
             WorldEdit.getInstance().getPlatformManager().unregister(platform);
         }
-
-        ForgeBiomeRegistry.populate();
 
         this.platform = new ForgePlatform(this);
 
@@ -134,13 +135,13 @@ public class ForgeWorldEdit {
 
     @SubscribeEvent
     public void onCommandEvent(CommandEvent event) {
-        if ((event.sender instanceof EntityPlayerMP)) {
-            if (((EntityPlayerMP) event.sender).worldObj.isRemote) return;
-            String[] split = new String[event.parameters.length + 1];
-            System.arraycopy(event.parameters, 0, split, 1, event.parameters.length);
-            split[0] = event.command.getCommandName();
+        if ((event.getSender() instanceof EntityPlayerMP)) {
+            if (((EntityPlayerMP) event.getSender()).world.isRemote) return;
+            String[] split = new String[event.getParameters().length + 1];
+            System.arraycopy(event.getParameters(), 0, split, 1, event.getParameters().length);
+            split[0] = event.getCommand().getName();
             com.sk89q.worldedit.event.platform.CommandEvent weEvent =
-                    new com.sk89q.worldedit.event.platform.CommandEvent(wrap((EntityPlayerMP) event.sender), Joiner.on(" ").join(split));
+                    new com.sk89q.worldedit.event.platform.CommandEvent(wrap((EntityPlayerMP) event.getSender()), Joiner.on(" ").join(split));
             WorldEdit.getInstance().getEventBus().post(weEvent);
         }
     }
@@ -151,47 +152,62 @@ public class ForgeWorldEdit {
             return;
         }
 
-        if (!platform.isHookingEvents()) return; // We have to be told to catch these events
+        if (!platform.isHookingEvents())
+            return; // We have to be told to catch these events
 
-        if (event.useItem == Result.DENY || event.entity.worldObj.isRemote) return;
+        if (event.getWorld().isRemote && event instanceof LeftClickEmpty) {
+            // catch LCE, pass it to server
+            InternalPacketHandler.CHANNEL.sendToServer(new LeftClickAirEventMessage());
+            return;
+        }
+        
+        boolean isLeftDeny = event instanceof PlayerInteractEvent.LeftClickBlock
+                && ((PlayerInteractEvent.LeftClickBlock) event)
+                        .getUseItem() == Result.DENY;
+        boolean isRightDeny =
+                event instanceof PlayerInteractEvent.RightClickBlock
+                        && ((PlayerInteractEvent.RightClickBlock) event)
+                                .getUseItem() == Result.DENY;
+        if (isLeftDeny || isRightDeny || event.getEntity().world.isRemote) {
+            return;
+        }
 
         WorldEdit we = WorldEdit.getInstance();
-        ForgePlayer player = wrap((EntityPlayerMP) event.entityPlayer);
-        ForgeWorld world = getWorld(event.entityPlayer.worldObj);
+        ForgePlayer player = wrap((EntityPlayerMP) event.getEntityPlayer());
+        ForgeWorld world = getWorld(event.getEntityPlayer().world);
 
-        switch (event.action) {
-            case LEFT_CLICK_BLOCK: {
-                WorldVector pos = new WorldVector(LocalWorldAdapter.adapt(world), event.pos.getX(), event.pos.getY(), event.pos.getZ());
-
-                if (we.handleBlockLeftClick(player, pos)) {
-                    event.setCanceled(true);
-                }
-
-                if (we.handleArmSwing(player)) {
-                    event.setCanceled(true);
-                }
-
-                break;
+        if (event instanceof LeftClickEmpty) {
+            if (we.handleArmSwing(player)) {
+                // this event cannot be canceled
+                // event.setCanceled(true);
             }
-            case RIGHT_CLICK_BLOCK: {
-                WorldVector pos = new WorldVector(LocalWorldAdapter.adapt(world), event.pos.getX(), event.pos.getY(), event.pos.getZ());
+        } else if (event instanceof PlayerInteractEvent.LeftClickBlock) {
+            @SuppressWarnings("deprecation")
+            WorldVector pos = new WorldVector(LocalWorldAdapter.adapt(world),
+                    event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
 
-                if (we.handleBlockRightClick(player, pos)) {
-                    event.setCanceled(true);
-                }
-
-                if (we.handleRightClick(player)) {
-                    event.setCanceled(true);
-                }
-
-                break;
+            if (we.handleBlockLeftClick(player, pos)) {
+                event.setCanceled(true);
             }
-            case RIGHT_CLICK_AIR: {
-                if (we.handleRightClick(player)) {
-                    event.setCanceled(true);
-                }
 
-                break;
+            if (we.handleArmSwing(player)) {
+                event.setCanceled(true);
+            }
+        } else if (event instanceof PlayerInteractEvent.RightClickBlock) {
+            @SuppressWarnings("deprecation")
+            WorldVector pos = new WorldVector(LocalWorldAdapter.adapt(world),
+                    event.getPos().getX(), event.getPos().getY(), event.getPos().getZ());
+
+            if (we.handleBlockRightClick(player, pos)) {
+                event.setCanceled(true);
+            }
+
+            if (we.handleRightClick(player)) {
+                event.setCanceled(true);
+            }
+        } else if (event instanceof PlayerInteractEvent.RightClickItem) {
+            if (we.handleRightClick(player)) {
+                event.setCanceled(true);
             }
         }
     }
@@ -199,7 +215,7 @@ public class ForgeWorldEdit {
     public static ItemStack toForgeItemStack(BaseItemStack item) {
         ItemStack ret = new ItemStack(Item.getItemById(item.getType()), item.getAmount(), item.getData());
         for (Map.Entry<Integer, Integer> entry : item.getEnchantments().entrySet()) {
-            ret.addEnchantment(net.minecraft.enchantment.Enchantment.getEnchantmentById(entry.getKey()), entry.getValue());
+            ret.addEnchantment(net.minecraft.enchantment.Enchantment.getEnchantmentByID(entry.getKey()), entry.getValue());
         }
 
         return ret;
@@ -222,7 +238,7 @@ public class ForgeWorldEdit {
      */
     public ForgePlayer wrap(EntityPlayerMP player) {
         checkNotNull(player);
-        return new ForgePlayer(platform, player);
+        return new ForgePlayer(player);
     }
 
     /**

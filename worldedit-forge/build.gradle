@@ -22,7 +22,7 @@ final def versions = [
         '1.11.2': [ compare: 11102, mappings: '32-1.11', forge: '1.11.2-13.20.1.2386' ],
         '1.12.2': [ compare: 11202, mappings: '39-1.12', forge: '1.12.2-14.23.5.2768' ]
 ]
-String minecraftVersion = project.hasProperty('mcVer') ? project.minecraftVersion as String: '1.8.9'
+String minecraftVersion = project.hasProperty('mcVer') ? project.minecraftVersion as String: '1.12.2'
 
 if (!versions.containsKey(minecraftVersion)) {
     throw new GradleException("Minecraft $minecraftVersion is not supported.")

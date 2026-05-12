@@ -17,29 +17,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.worldedit.forge.gui;
+package com.sk89q.worldedit.forge;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.IGuiHandler;
+import java.nio.charset.Charset;
 
-public class GuiHandler implements IGuiHandler {
+import com.sk89q.worldedit.forge.net.LeftClickAirEventMessage;
 
-    public static final int REFERENCE_ID = 0;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
-    @Override
-    public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-        return null;
+public class InternalPacketHandler {
+    public static final Charset UTF_8_CHARSET = Charset.forName("UTF-8");
+    public static SimpleNetworkWrapper CHANNEL;
+
+    public static void init() {
+         CHANNEL = NetworkRegistry.INSTANCE.newSimpleChannel(ForgeWorldEdit.MOD_ID);
+         CHANNEL.registerMessage(LeftClickAirEventMessage.Handler.class, LeftClickAirEventMessage.class, 0, Side.SERVER);
     }
 
-    @Override
-    public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-        switch (id) {
-            case REFERENCE_ID:
-                return new GuiReferenceCard();
-        }
-
-        return null;
+    private InternalPacketHandler() {
     }
-
 }

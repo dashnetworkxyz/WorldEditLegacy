@@ -40,7 +40,7 @@ class ForgeEntity implements Entity {
 
     ForgeEntity(net.minecraft.entity.Entity entity) {
         checkNotNull(entity);
-        this.entityRef = new WeakReference<>(entity);
+        this.entityRef = new WeakReference<net.minecraft.entity.Entity>(entity);
     }
 
     @Override
@@ -68,7 +68,7 @@ class ForgeEntity implements Entity {
             float yaw = entity.rotationYaw;
             float pitch = entity.rotationPitch;
 
-            return new Location(ForgeAdapter.adapt(entity.worldObj), position, yaw, pitch);
+            return new Location(ForgeAdapter.adapt(entity.world), position, yaw, pitch);
         } else {
             return new Location(NullWorld.getInstance());
         }
@@ -78,7 +78,7 @@ class ForgeEntity implements Entity {
     public Extent getExtent() {
         net.minecraft.entity.Entity entity = entityRef.get();
         if (entity != null) {
-            return ForgeAdapter.adapt(entity.worldObj);
+            return ForgeAdapter.adapt(entity.world);
         } else {
             return NullWorld.getInstance();
         }

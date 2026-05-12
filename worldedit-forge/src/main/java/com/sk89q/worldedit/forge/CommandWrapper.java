@@ -25,8 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
 
 public class CommandWrapper extends CommandBase {
     private CommandMapping command;
@@ -36,20 +38,21 @@ public class CommandWrapper extends CommandBase {
     }
 
     @Override
-    public String getCommandName() {
+    public String getName() {
         return command.getPrimaryAlias();
     }
 
     @Override
-    public List<String> getCommandAliases() {
+    public List<String> getAliases() {
         return Arrays.asList(command.getAllAliases());
     }
 
     @Override
-    public void processCommand(ICommandSender var1, String[] var2) {}
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    }
 
     @Override
-    public String getCommandUsage(ICommandSender icommandsender) {
+    public String getUsage(ICommandSender icommandsender) {
         return "/" + command.getPrimaryAlias() + " " + command.getDescription().getUsage();
     }
 
@@ -59,7 +62,7 @@ public class CommandWrapper extends CommandBase {
     }
 
     @Override
-    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
         return true;
     }
 

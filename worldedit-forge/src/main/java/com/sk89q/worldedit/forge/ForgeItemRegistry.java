@@ -16,30 +16,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+package com.sk89q.worldedit.forge;
 
-package com.sk89q.worldedit.forge.gui;
+import com.sk89q.worldedit.blocks.BaseItem;
+import com.sk89q.worldedit.world.registry.ItemRegistry;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.IGuiHandler;
+import javax.annotation.Nullable;
 
-public class GuiHandler implements IGuiHandler {
-
-    public static final int REFERENCE_ID = 0;
-
+public class ForgeItemRegistry implements ItemRegistry {
+    @Nullable
     @Override
-    public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-        return null;
-    }
-
-    @Override
-    public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-        switch (id) {
-            case REFERENCE_ID:
-                return new GuiReferenceCard();
+    public BaseItem createFromId(String id) {
+        Item match = Item.REGISTRY.getObject(new ResourceLocation(id));
+        if (match != null) {
+            return new BaseItem(Item.REGISTRY.getIDForObject(match), (short) 0);
+        } else {
+            return null;
         }
-
-        return null;
     }
 
+    @Nullable
+    @Override
+    public BaseItem createFromId(int id) {
+        if (Item.REGISTRY.getObjectById(id) != null) {
+            return new BaseItem(id, (short) 0);
+        } else {
+            return null;
+        }
+    }
 }

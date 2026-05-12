@@ -175,7 +175,7 @@ final class NBTConverter {
     }
 
     public static ListTag fromNative(NBTTagList other) {
-        other = (NBTTagList) other.copy();
+        other = other.copy();
         List<Tag> list = new ArrayList<Tag>();
         Class<? extends Tag> listClass = StringTag.class;
         int tags = other.tagCount();
@@ -214,7 +214,7 @@ final class NBTConverter {
 
     public static CompoundTag fromNative(NBTTagCompound other) {
         Set<String> tags = other.getKeySet();
-        Map<String, Tag> map = new HashMap<>();
+        Map<String, Tag> map = new HashMap<String, Tag>();
         for (String tagName : tags) {
             map.put(tagName, fromNative(other.getTag(tagName)));
         }
