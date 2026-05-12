@@ -74,7 +74,6 @@ subprojects {
 
     remapJar {
         archiveClassifier.set('')
-        //noinspection GroovyAssignabilityCheck
         inputFile.set(tasks.shadowJar.archiveFile)
     }
 
