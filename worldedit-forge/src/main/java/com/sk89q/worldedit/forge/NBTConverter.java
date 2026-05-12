@@ -30,8 +30,7 @@ import java.util.Map.Entry;
  */
 final class NBTConverter {
 
-    private NBTConverter() {
-    }
+    private NBTConverter() {}
 
     public static NBTBase toNative(Tag tag) {
         if (tag instanceof IntArrayTag) {
@@ -78,12 +77,15 @@ final class NBTConverter {
 
     public static NBTTagList toNative(ListTag tag) {
         NBTTagList list = new NBTTagList();
+
         for (Tag child : tag.getValue()) {
             if (child instanceof EndTag) {
                 continue;
             }
+
             list.appendTag(toNative(child));
         }
+
         return list;
     }
 
@@ -110,9 +112,11 @@ final class NBTConverter {
 
     public static NBTTagCompound toNative(CompoundTag tag) {
         NBTTagCompound compound = new NBTTagCompound();
+
         for (Entry<String, Tag> child : tag.getValue().entrySet()) {
             compound.setTag(child.getKey(), toNative(child.getValue()));
         }
+
         return compound;
     }
 
@@ -176,14 +180,16 @@ final class NBTConverter {
 
     public static ListTag fromNative(NBTTagList other) {
         other = other.copy();
-        List<Tag> list = new ArrayList<Tag>();
+        List<Tag> list = new ArrayList<>();
         Class<? extends Tag> listClass = StringTag.class;
         int tags = other.tagCount();
+
         for (int i = 0; i < tags; i++) {
             Tag child = fromNative(other.removeTag(0));
             list.add(child);
             listClass = child.getClass();
         }
+
         return new ListTag(listClass, list);
     }
 
@@ -214,10 +220,12 @@ final class NBTConverter {
 
     public static CompoundTag fromNative(NBTTagCompound other) {
         Set<String> tags = other.getKeySet();
-        Map<String, Tag> map = new HashMap<String, Tag>();
+        Map<String, Tag> map = new HashMap<>();
+
         for (String tagName : tags) {
             map.put(tagName, fromNative(other.getTag(tagName)));
         }
+
         return new CompoundTag(map);
     }
 

@@ -42,4 +42,5 @@ public class ForgeConfiguration extends PropertiesConfiguration {
     public File getWorkingDirectory() {
         return ForgeWorldEdit.inst.getWorkingDir();
     }
+
 }

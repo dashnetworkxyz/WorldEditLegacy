@@ -20,6 +20,7 @@
 package com.sk89q.worldedit.forge;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import com.sk89q.worldedit.forge.net.LeftClickAirEventMessage;
 
@@ -28,7 +29,10 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
 public class InternalPacketHandler {
-    public static final Charset UTF_8_CHARSET = Charset.forName("UTF-8");
+
+    private InternalPacketHandler() {}
+
+    public static final Charset UTF_8_CHARSET = StandardCharsets.UTF_8;
     public static SimpleNetworkWrapper CHANNEL;
 
     public static void init() {
@@ -36,6 +40,4 @@ public class InternalPacketHandler {
          CHANNEL.registerMessage(LeftClickAirEventMessage.Handler.class, LeftClickAirEventMessage.class, 0, Side.SERVER);
     }
 
-    private InternalPacketHandler() {
-    }
 }

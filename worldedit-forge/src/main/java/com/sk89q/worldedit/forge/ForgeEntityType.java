@@ -25,7 +25,9 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.IProjectile;
-import net.minecraft.entity.MultiPartEntityPart;
+//#if MC>11102
+//$$import net.minecraft.entity.MultiPartEntityPart;
+//#endif
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.item.EntityEnderEye;
@@ -136,7 +138,7 @@ public class ForgeEntityType implements EntityType {
 
     @Override
     public boolean isTagged() {
-        return entity instanceof EntityLiving && ((EntityLiving) entity).hasCustomName();
+        return entity instanceof EntityLiving && entity.hasCustomName();
     }
 
     @Override
@@ -146,6 +148,11 @@ public class ForgeEntityType implements EntityType {
 
     @Override
     public boolean isPasteable() {
-        return !(entity instanceof EntityPlayerMP || entity instanceof MultiPartEntityPart);
+        //#if MC>11102
+        //$$return !(entity instanceof EntityPlayerMP || entity instanceof MultiPartEntityPart);
+        //#else
+        return !(entity instanceof EntityPlayerMP);
+        //#endif
     }
+
 }

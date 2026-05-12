@@ -126,6 +126,7 @@ public class ForgeWorld extends AbstractWorld {
      */
     public World getWorldChecked() throws WorldEditException {
         World world = worldRef.get();
+
         if (world != null) {
             return world;
         } else {
@@ -141,6 +142,7 @@ public class ForgeWorld extends AbstractWorld {
      */
     public World getWorld() {
         World world = worldRef.get();
+
         if (world != null) {
             return world;
         } else {
@@ -204,14 +206,18 @@ public class ForgeWorld extends AbstractWorld {
     public boolean clearContainerBlockContents(Vector position) {
         checkNotNull(position);
         TileEntity tile = getWorld().getTileEntity(new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ()));
+
         if ((tile instanceof IInventory)) {
             IInventory inv = (IInventory) tile;
             int size = inv.getSizeInventory();
+
             for (int i = 0; i < size; i++) {
                 inv.setInventorySlotContents(i, ItemStack.EMPTY);
             }
+
             return true;
         }
+
         return false;
     }
 
@@ -227,7 +233,7 @@ public class ForgeWorld extends AbstractWorld {
         checkNotNull(biome);
 
         Chunk chunk = getWorld().getChunkFromBlockCoords(new BlockPos(position.getBlockX(), 0, position.getBlockZ()));
-        if ((chunk != null) && (chunk.isLoaded())) {
+        if (chunk.isLoaded()) {
             chunk.getBiomeArray()[((position.getBlockZ() & 0xF) << 4 | position.getBlockX() & 0xF)] = (byte) biome.getId();
             return true;
         }
@@ -331,9 +337,9 @@ public class ForgeWorld extends AbstractWorld {
     }
 
     @Override
-    public boolean generateTree(TreeType type, EditSession editSession, Vector position) throws MaxChangedBlocksException {
+    public boolean generateTree(TreeType type, EditSession editSession, Vector position) {
         WorldGenerator generator = createWorldGenerator(type);
-        return generator != null ? generator.generate(getWorld(), random, ForgeAdapter.toBlockPos(position)) : false;
+        return generator != null && generator.generate(getWorld(), random, ForgeAdapter.toBlockPos(position));
     }
 
     @Override
@@ -382,7 +388,7 @@ public class ForgeWorld extends AbstractWorld {
             ForgeWorld other = ((ForgeWorld) o);
             World otherWorld = other.worldRef.get();
             World thisWorld = worldRef.get();
-            return otherWorld != null && thisWorld != null && otherWorld.equals(thisWorld);
+            return otherWorld != null && otherWorld.equals(thisWorld);
         } else if (o instanceof com.sk89q.worldedit.world.World) {
             return ((com.sk89q.worldedit.world.World) o).getName().equals(getName());
         } else {
@@ -392,21 +398,25 @@ public class ForgeWorld extends AbstractWorld {
 
     @Override
     public List<? extends Entity> getEntities(Region region) {
-        List<Entity> entities = new ArrayList<Entity>();
+        List<Entity> entities = new ArrayList<>();
+
         for (net.minecraft.entity.Entity entity : getWorld().loadedEntityList) {
             if (region.contains(new Vector(entity.posX, entity.posY, entity.posZ))) {
                 entities.add(new ForgeEntity(entity));
             }
         }
+
         return entities;
     }
 
     @Override
     public List<? extends Entity> getEntities() {
-        List<Entity> entities = new ArrayList<Entity>();
+        List<Entity> entities = new ArrayList<>();
+
         for (net.minecraft.entity.Entity entity : getWorld().loadedEntityList) {
             entities.add(new ForgeEntity(entity));
         }
+
         return entities;
     }
 
@@ -415,13 +425,17 @@ public class ForgeWorld extends AbstractWorld {
     public Entity createEntity(Location location, BaseEntity entity) {
         World world = getWorld();
         net.minecraft.entity.Entity createdEntity = EntityList.createEntityByIDFromName(new ResourceLocation(entity.getTypeId()), world);
+
         if (createdEntity != null) {
             CompoundTag nativeTag = entity.getNbtData();
+
             if (nativeTag != null) {
                 NBTTagCompound tag = NBTConverter.toNative(entity.getNbtData());
+
                 for (String name : Constants.NO_COPY_ENTITY_NBT_FIELDS) {
                     tag.removeTag(name);
                 }
+
                 createdEntity.readFromNBT(tag);
             }
 
@@ -437,7 +451,6 @@ public class ForgeWorld extends AbstractWorld {
     /**
      * Thrown when the reference to the world is lost.
      */
-    @SuppressWarnings("serial")
     private static class WorldReferenceLostException extends WorldEditException {
         private WorldReferenceLostException(String message) {
             super(message);

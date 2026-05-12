@@ -59,7 +59,7 @@ public class ForgePlayer extends AbstractPlayerActor {
     @Override
     public int getItemInHand() {
         ItemStack is = this.player.getHeldItem(EnumHand.MAIN_HAND);
-        return is == null ? 0 : Item.getIdFromItem(is.getItem());
+        return Item.getIdFromItem(is.getItem());
     }
 
     @Override

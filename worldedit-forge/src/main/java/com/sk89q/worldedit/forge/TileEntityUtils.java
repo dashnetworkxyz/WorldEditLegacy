@@ -36,8 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class TileEntityUtils {
 
-    private TileEntityUtils() {
-    }
+    private TileEntityUtils() {}
 
     /**
      * Update the given tag compound with position information.
@@ -97,6 +96,7 @@ final class TileEntityUtils {
         if (tag != null) {
             updateForSet(tag, position);
             TileEntity tileEntity = TileEntity.create(world, tag);
+
             if (tileEntity != null) {
                 world.setTileEntity(new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ()), tileEntity);
             }
@@ -114,6 +114,7 @@ final class TileEntityUtils {
     @Nullable
     static TileEntity constructTileEntity(World world, Vector position, Class<? extends TileEntity> clazz) {
         Constructor<? extends TileEntity> baseConstructor;
+
         try {
             baseConstructor = clazz.getConstructor(); // creates "blank" TE
         } catch (Throwable e) {
@@ -121,6 +122,7 @@ final class TileEntityUtils {
         }
 
         TileEntity genericTE;
+
         try {
             genericTE = baseConstructor.newInstance();
         } catch (Throwable e) {

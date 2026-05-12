@@ -36,6 +36,7 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketE
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 public class WECUIPacketHandler {
+
     public static final Charset UTF_8_CHARSET = StandardCharsets.UTF_8;
     public static FMLEventChannel WECUI_CHANNEL;
     
@@ -64,11 +65,11 @@ public class WECUIPacketHandler {
     public void callProcessPacket(ClientCustomPacketEvent event) {
         try {
             new SPacketCustomPayload(event.getPacket().channel(), new PacketBuffer(event.getPacket().payload())).processPacket(event.getHandler());
-        } catch (ThreadQuickExitException suppress) {
-        }
+        } catch (ThreadQuickExitException ignored) {}
     }
 
     private static EntityPlayerMP getPlayerFromEvent(ServerCustomPacketEvent event) {
         return ((NetHandlerPlayServer) event.getHandler()).player;
     }
+
 }

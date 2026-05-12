@@ -28,8 +28,7 @@ import net.minecraft.util.math.Vec3d;
 
 final class ForgeAdapter {
 
-    private ForgeAdapter() {
-    }
+    private ForgeAdapter() {}
 
     public static World adapt(net.minecraft.world.World world) {
         return new ForgeWorld(world);

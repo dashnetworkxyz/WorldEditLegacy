@@ -177,10 +177,7 @@ public class ForgeWorldEdit {
         ForgeWorld world = getWorld(event.getEntityPlayer().world);
 
         if (event instanceof LeftClickEmpty) {
-            if (we.handleArmSwing(player)) {
-                // this event cannot be canceled
-                // event.setCanceled(true);
-            }
+            we.handleArmSwing(player); // this event cannot be canceled
         } else if (event instanceof PlayerInteractEvent.LeftClickBlock) {
             @SuppressWarnings("deprecation")
             WorldVector pos = new WorldVector(LocalWorldAdapter.adapt(world),

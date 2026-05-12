@@ -26,6 +26,7 @@ import net.minecraft.util.ResourceLocation;
 import javax.annotation.Nullable;
 
 public class ForgeItemRegistry implements ItemRegistry {
+
     @Nullable
     @Override
     public BaseItem createFromId(String id) {
@@ -46,4 +47,5 @@ public class ForgeItemRegistry implements ItemRegistry {
             return null;
         }
     }
+
 }
