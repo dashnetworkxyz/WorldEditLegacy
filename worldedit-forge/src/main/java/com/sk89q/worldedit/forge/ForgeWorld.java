@@ -340,7 +340,7 @@ public class ForgeWorld extends AbstractWorld {
 
     @Override
     public boolean isValidBlockType(int id) {
-        return (id == 0) || (net.minecraft.block.Block.getBlockById(id) != null);
+        return (id == 0) || (Block.getBlockById(id) != null);
     }
 
     @Override

@@ -9,86 +9,111 @@ buildscript {
     }
 
     dependencies {
-        classpath 'gg.essential.defaults.repo:gg.essential.defaults.repo.gradle.plugin:0.7.0'
+        classpath 'com.igormaznitsa:jcp:7.3.0'
+        classpath 'gg.essential.loom:gg.essential.loom.gradle.plugin:1.15.50'
+        classpath 'dev.architectury:architectury-pack200:0.1.3'
     }
 }
 
-apply plugin: 'gg.essential.defaults.repo'
+final def versions = [
+        '1.8.9': [ compare: 10809, mappings: '22-1.8.9', forge: '1.8.9-11.15.1.2318-1.8.9' ],
+        '1.9.4': [ compare: 10904, mappings: '26-1.9.4', forge: '1.9.4-12.17.0.1965' ],
+        '1.10.2': [ compare: 11002, mappings: '29-1.10.2', forge: '1.10.2-12.18.0.2002-1.10.0' ],
+        '1.11.2': [ compare: 11102, mappings: '32-1.11', forge: '1.11.2-13.20.1.2386' ],
+        '1.12.2': [ compare: 11202, mappings: '39-1.12', forge: '1.12.2-14.23.5.2768' ]
+]
+String minecraftVersion = project.hasProperty('mcVer') ? project.minecraftVersion as String: '1.8.9'
 
-allprojects {
-    apply plugin: 'gg.essential.loom'
-    apply plugin: 'dev.architectury.architectury-pack200'
-
-    repositories {
-        maven { url = 'https://repo.spongepowered.org/maven' }
-    }
-
-    dependencies {
-        implementation project(':worldedit-core')
-        implementation 'org.spongepowered:spongeapi:7.4.0-SNAPSHOT'
-        testImplementation 'org.mockito:mockito-core:1.9.0-rc1'
-
-        minecraft "com.mojang:minecraft:$minecraftVersion"
-        mappings "de.oceanlabs.mcp:mcp_stable:$mappingsVersion"
-        forge "net.minecraftforge:forge:$forgeVersion"
-    }
+if (!versions.containsKey(minecraftVersion)) {
+    throw new GradleException("Minecraft $minecraftVersion is not supported.")
 }
 
-subprojects {
-    dependencies {
-        implementation project(':worldedit-forge')
-    }
+apply plugin: 'com.igormaznitsa.jcp'
+apply plugin: 'gg.essential.loom'
+apply plugin: 'dev.architectury.architectury-pack200'
 
-    final File transformerFile = file 'src/main/resources/worldedit_at.cfg'
+repositories {
+    maven { url = 'https://repo.spongepowered.org/maven' }
+}
 
-    loom {
-        forge {
-            pack200Provider.set(Pack200Adapter.getDeclaredConstructor().newInstance())
+dependencies {
+    implementation project(':worldedit-core')
+    implementation 'org.spongepowered:spongeapi:7.4.0-SNAPSHOT'
+    testImplementation 'org.mockito:mockito-core:1.9.0-rc1'
 
-            if (transformerFile.exists()) {
-                println('Installing access transformer')
-                accessTransformer(transformerFile)
-            }
-        }
-    }
+    minecraft "com.mojang:minecraft:$minecraftVersion"
+    mappings "de.oceanlabs.mcp:mcp_stable:${versions[minecraftVersion].mappings}"
+    forge "net.minecraftforge:forge:${versions[minecraftVersion].forge}"
+}
 
-    processResources {
-        filesMatching('mcmod.info') {
-            expand(
-                    internalVersion: version,
-                    mcVersion: minecraftVersion,
-                    forgeVersion: forgeVersion
-            )
-        }
-    }
+final File transformerFile = file 'src/main/resources/worldedit_at.cfg'
 
-    tasks.withType(org.gradle.jvm.tasks.Jar).configureEach {
-        archiveBaseName.set('worldedit')
-        manifest.attributes['FMLCorePluginContainsFMLMod'] = 'true'
-        manifest.attributes['ForceLoadAsMod'] = 'true'
+loom {
+    forge {
+        pack200Provider.set(Pack200Adapter.getDeclaredConstructor().newInstance())
 
         if (transformerFile.exists()) {
-            manifest.attributes['FMLAT'] = 'worldedit_at.cfg'
+            println('Installing access transformer')
+            accessTransformer(transformerFile)
         }
     }
-
-    remapJar {
-        archiveClassifier.set('')
-        inputFile.set(tasks.shadowJar.archiveFile)
-    }
-
-    jar {
-        archiveClassifier.set('without-deps')
-    }
-
-    shadowJar {
-        dependencies {
-            include(dependency(':worldedit-core'))
-            include(dependency(':worldedit-forge'))
-        }
-
-        archiveClassifier.set('non-obfuscated')
-    }
-
-    tasks.assemble.dependsOn(tasks.remapJar)
 }
+
+processResources {
+    filesMatching('mcmod.info') {
+        expand(
+                internalVersion: version,
+                mcVersion: minecraftVersion,
+                forgeVersion: versions[minecraftVersion].forge
+        )
+    }
+}
+
+preprocess {
+    outputs.upToDateWhen { target.get().exists() } // https://github.com/raydac/java-comment-preprocessor/issues/42
+
+    sources = sourceSets.main.java.srcDirs
+    fileExtensions = ['java']
+    actionPreprocessorExtensions = ["com.igormaznitsa.jcp.extension.LogPreprocessorExtension"]
+    vars = ['MC': versions[minecraftVersion].compare]
+}
+
+tasks.register('changeSourceFolder') {
+    dependsOn tasks.named('preprocess')
+    doLast {
+        sourceSets.main.java.srcDirs = [preprocess.target]
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    archiveBaseName.set("worldedit-forge-$minecraftVersion")
+    manifest.attributes['FMLCorePluginContainsFMLMod'] = 'true'
+    manifest.attributes['ForceLoadAsMod'] = 'true'
+
+    if (transformerFile.exists()) {
+        manifest.attributes['FMLAT'] = 'worldedit_at.cfg'
+    }
+}
+
+remapJar {
+    archiveBaseName.set("worldedit-forge-$minecraftVersion")
+    archiveClassifier.set('')
+    //noinspection GroovyAssignabilityCheck
+    inputFile.set(tasks.shadowJar.archiveFile)
+}
+
+jar {
+    archiveClassifier.set('without-deps')
+}
+
+shadowJar {
+    dependencies {
+        //noinspection DependencyNotationArgument
+        include(dependency(':worldedit-core'))
+    }
+
+    archiveClassifier.set('non-obfuscated')
+}
+
+compileJava.dependsOn changeSourceFolder
+assemble.dependsOn remapJar

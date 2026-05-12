@@ -5,11 +5,7 @@ include 'worldedit-core'
 include 'worldedit-bukkit'
 
 // Forge
-include 'worldedit-forge:1.8.9'
-include 'worldedit-forge:1.9.4'
-include 'worldedit-forge:1.10.2'
-include 'worldedit-forge:1.11.2'
-include 'worldedit-forge:1.12.2'
+include 'worldedit-forge'
 
 // Sponge
 //include 'worldedit-sponge' TODO: No sponge for now

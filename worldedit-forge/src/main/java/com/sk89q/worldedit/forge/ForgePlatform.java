@@ -108,9 +108,9 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
     }
 
     @Override
-    public List<? extends com.sk89q.worldedit.world.World> getWorlds() {
+    public List<? extends World> getWorlds() {
         List<WorldServer> worlds = Arrays.asList(DimensionManager.getWorlds());
-        List<com.sk89q.worldedit.world.World> ret = new ArrayList<>(worlds.size());
+        List<World> ret = new ArrayList<>(worlds.size());
         for (WorldServer world : worlds) {
             ret.add(new ForgeWorld(world));
         }
