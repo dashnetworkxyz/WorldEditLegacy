@@ -33,24 +33,18 @@ public class LeftClickAirEventMessage implements IMessage {
 
         @Override
         public IMessage onMessage(LeftClickAirEventMessage message, final MessageContext ctx) {
-            ctx.getServerHandler().player.mcServer.addScheduledTask(new Runnable() {
-
-                @Override
-                public void run() {
-                    ForgeWorldEdit.inst.onPlayerInteract(new PlayerInteractEvent.LeftClickEmpty(ctx.getServerHandler().player));
-                }
-            });
+            ctx.getServerHandler().player.mcServer.addScheduledTask(
+                    () -> ForgeWorldEdit.inst.onPlayerInteract(new PlayerInteractEvent.LeftClickEmpty(ctx.getServerHandler().player))
+            );
             return null;
         }
 
     }
 
     @Override
-    public void fromBytes(ByteBuf buf) {
-    }
+    public void fromBytes(ByteBuf buf) {}
 
     @Override
-    public void toBytes(ByteBuf buf) {
-    }
+    public void toBytes(ByteBuf buf) {}
 
 }
