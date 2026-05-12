@@ -17,11 +17,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
- package com.sk89q.worldedit.forge.net;
+package com.sk89q.worldedit.forge.net;
 
 import com.sk89q.worldedit.forge.ForgeWorldEdit;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -33,8 +34,20 @@ public class LeftClickAirEventMessage implements IMessage {
 
         @Override
         public IMessage onMessage(LeftClickAirEventMessage message, final MessageContext ctx) {
-            ctx.getServerHandler().player.mcServer.addScheduledTask(
-                    () -> ForgeWorldEdit.inst.onPlayerInteract(new PlayerInteractEvent.LeftClickEmpty(ctx.getServerHandler().player))
+            //#if MC>11002
+            //$$EntityPlayerMP player = ctx.getServerHandler().player;
+            //#else
+            EntityPlayerMP player = ctx.getServerHandler().playerEntity;
+            //#endif
+
+            player.mcServer.addScheduledTask(
+                    () -> ForgeWorldEdit.inst.onPlayerInteract(new PlayerInteractEvent.LeftClickEmpty(
+                            //#if MC>11002
+                            //$$player
+                            //#else
+                            player, null
+                            //#endif
+                    ))
             );
             return null;
         }

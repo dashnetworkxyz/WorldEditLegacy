@@ -69,7 +69,11 @@ public class WECUIPacketHandler {
     }
 
     private static EntityPlayerMP getPlayerFromEvent(ServerCustomPacketEvent event) {
-        return ((NetHandlerPlayServer) event.getHandler()).player;
+        //#if MC>11002
+        //$$return ((NetHandlerPlayServer) event.getHandler()).player;
+        //#else
+        return ((NetHandlerPlayServer) event.getHandler()).playerEntity;
+        //#endif
     }
 
 }

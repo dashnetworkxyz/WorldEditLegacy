@@ -212,7 +212,11 @@ public class ForgeWorld extends AbstractWorld {
             int size = inv.getSizeInventory();
 
             for (int i = 0; i < size; i++) {
-                inv.setInventorySlotContents(i, ItemStack.EMPTY);
+                //#if MC>11002
+                //$$inv.setInventorySlotContents(i, ItemStack.EMPTY);
+                //#else
+                inv.setInventorySlotContents(i, null);
+                //#endif
             }
 
             return true;
@@ -283,8 +287,13 @@ public class ForgeWorld extends AbstractWorld {
         MinecraftServer server = originalWorld.getMinecraftServer();
         AnvilSaveHandler saveHandler = new AnvilSaveHandler(saveFolder,
                 originalWorld.getSaveHandler().getWorldDirectory().getName(), true, server.getDataFixer());
-        World freshWorld = new WorldServer(server, saveHandler, originalWorld.getWorldInfo(),
-                originalWorld.provider.getDimension(), originalWorld.profiler).init();
+        World freshWorld = new WorldServer(server, saveHandler, originalWorld.getWorldInfo(), originalWorld.provider.getDimension(),
+                //#if MC>11002
+                //$$originalWorld.profiler
+                //#else
+                originalWorld.theProfiler
+                //#endif
+        ).init();
 
         // Pre-gen all the chunks
         // We need to also pull one more chunk in every direction
@@ -424,7 +433,11 @@ public class ForgeWorld extends AbstractWorld {
     @Override
     public Entity createEntity(Location location, BaseEntity entity) {
         World world = getWorld();
-        net.minecraft.entity.Entity createdEntity = EntityList.createEntityByIDFromName(new ResourceLocation(entity.getTypeId()), world);
+        //#if MC>11002
+        //$$net.minecraft.entity.Entity createdEntity = EntityList.createEntityByIDFromName(new ResourceLocation(entity.getTypeId()), world);
+        //#else
+        net.minecraft.entity.Entity createdEntity = EntityList.createEntityByName(entity.getTypeId(), world);
+        //#endif
 
         if (createdEntity != null) {
             CompoundTag nativeTag = entity.getNbtData();

@@ -72,6 +72,7 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
 
         if (index != 0 && index != name.length() - 1) {
             Block block = Block.getBlockFromName(name);
+
             if (block != null) {
                 return Block.getIdFromBlock(block);
             }
@@ -92,7 +93,11 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
 
     @Override
     public boolean isValidMobType(String type) {
-        return EntityList.isRegistered(new ResourceLocation(type));
+        //#if MC>11002
+        //$$return EntityList.isRegistered(new ResourceLocation(type));
+        //#else
+        return EntityList.NAME_TO_CLASS.containsKey(type);
+        //#endif
     }
 
     @Override
@@ -109,9 +114,11 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
     public List<? extends World> getWorlds() {
         WorldServer[] worlds = DimensionManager.getWorlds();
         List<World> ret = new ArrayList<>(worlds.length);
+
         for (WorldServer world : worlds) {
             ret.add(new ForgeWorld(world));
         }
+
         return ret;
     }
 
@@ -150,8 +157,10 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
         for (final CommandMapping command : dispatcher.getCommands()) {
             CommandWrapper wrapper = new CommandWrapper(command);
             mcMan.registerCommand(wrapper);
+
             if (!command.getDescription().getPermissions().isEmpty()) {
                 ForgeWorldEdit.inst.getPermissionsProvider().registerPermission(wrapper, command.getDescription().getPermissions().get(0));
+
                 for (int i = 1; i < command.getDescription().getPermissions().size(); i++) {
                     ForgeWorldEdit.inst.getPermissionsProvider().registerPermission(null, command.getDescription().getPermissions().get(i));
                 }

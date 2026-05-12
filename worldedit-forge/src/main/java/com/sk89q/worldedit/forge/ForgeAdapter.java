@@ -35,7 +35,11 @@ final class ForgeAdapter {
     }
 
     public static Vector adapt(Vec3d vector) {
-        return new Vector(vector.x, vector.y, vector.z);
+        //#if MC>11002
+        //$$return new Vector(vector.x, vector.y, vector.z);
+        //#else
+        return new Vector(vector.xCoord, vector.yCoord, vector.zCoord);
+        //#endif
     }
 
     public static Vector adapt(BlockPos pos) {
