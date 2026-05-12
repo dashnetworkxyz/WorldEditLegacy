@@ -28,7 +28,7 @@ import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.event.platform.PlatformReadyEvent;
 import com.sk89q.worldedit.extension.platform.Platform;
-//#if MC>10809
+//#if MC>10904
 import com.sk89q.worldedit.forge.net.LeftClickAirEventMessage;
 //#endif
 import com.sk89q.worldedit.internal.LocalWorldAdapter;
@@ -42,7 +42,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-//#if MC>10809
+//#if MC>10904
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickEmpty;
 //#endif
 import net.minecraftforge.fml.common.Loader;
@@ -100,7 +100,7 @@ public class ForgeWorldEdit {
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(this);
         WECUIPacketHandler.init();
-        //#if MC>10809
+        //#if MC>10904
         //$$InternalPacketHandler.init();
         //#endif
         proxy.registerHandlers();
@@ -194,7 +194,7 @@ public class ForgeWorldEdit {
         if (!platform.isHookingEvents())
             return; // We have to be told to catch these events
 
-        //#if MC>10809
+        //#if MC>10904
         if (event.getWorld().isRemote && event instanceof LeftClickEmpty) {
             // catch LCE, pass it to server
             InternalPacketHandler.CHANNEL.sendToServer(new LeftClickAirEventMessage());
@@ -239,12 +239,16 @@ public class ForgeWorldEdit {
             //#endif
         //#endif
 
-        //#if MC>10809
+        //#if MC>10904
         if (event instanceof LeftClickEmpty) {
             we.handleArmSwing(player); // this event cannot be canceled
         } else if (event instanceof PlayerInteractEvent.LeftClickBlock) {
         //#else
-        //$$if (event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) {
+            //#if MC>10809
+            //$$if (event instanceof PlayerInteractEvent.LeftClickBlock) {
+            //#else
+            //$$if (event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) {
+            //#endif
         //#endif
             @SuppressWarnings("deprecation")
             WorldVector pos = new WorldVector(LocalWorldAdapter.adapt(world),
