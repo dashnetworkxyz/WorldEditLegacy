@@ -70,9 +70,9 @@ class ForgeEntity implements Entity {
             float pitch = entity.rotationPitch;
 
             //#if MC>10904
-            //$$return new Location(ForgeAdapter.adapt(entity.world), position, yaw, pitch);
+            return new Location(ForgeAdapter.adapt(entity.world), position, yaw, pitch);
             //#else
-            return new Location(ForgeAdapter.adapt(entity.worldObj), position, yaw, pitch);
+            //$$return new Location(ForgeAdapter.adapt(entity.worldObj), position, yaw, pitch);
             //#endif
         } else {
             return new Location(NullWorld.getInstance());
@@ -85,9 +85,9 @@ class ForgeEntity implements Entity {
 
         if (entity != null) {
             //#if MC>10904
-            //$$return ForgeAdapter.adapt(entity.world);
+            return ForgeAdapter.adapt(entity.world);
             //#else
-            return ForgeAdapter.adapt(entity.worldObj);
+            //$$return ForgeAdapter.adapt(entity.worldObj);
             //#endif
         } else {
             return NullWorld.getInstance();

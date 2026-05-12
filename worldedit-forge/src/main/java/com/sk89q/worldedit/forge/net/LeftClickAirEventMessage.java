@@ -17,6 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+//#if MC>10809
 package com.sk89q.worldedit.forge.net;
 
 import com.sk89q.worldedit.forge.ForgeWorldEdit;
@@ -35,17 +36,21 @@ public class LeftClickAirEventMessage implements IMessage {
         @Override
         public IMessage onMessage(LeftClickAirEventMessage message, final MessageContext ctx) {
             //#if MC>11002
-            //$$EntityPlayerMP player = ctx.getServerHandler().player;
+            EntityPlayerMP player = ctx.getServerHandler().player;
             //#else
-            EntityPlayerMP player = ctx.getServerHandler().playerEntity;
+            //$$EntityPlayerMP player = ctx.getServerHandler().playerEntity;
             //#endif
 
-            player.mcServer.addScheduledTask(
+            //#if MC>11102
+            player.server.addScheduledTask(
+            //#else
+            //$$player.mcServer.addScheduledTask(
+            //#endif
                     () -> ForgeWorldEdit.inst.onPlayerInteract(new PlayerInteractEvent.LeftClickEmpty(
                             //#if MC>11002
-                            //$$player
+                            player
                             //#else
-                            player, null
+                            //$$player, null
                             //#endif
                     ))
             );
@@ -61,3 +66,4 @@ public class LeftClickAirEventMessage implements IMessage {
     public void toBytes(ByteBuf buf) {}
 
 }
+//#endif

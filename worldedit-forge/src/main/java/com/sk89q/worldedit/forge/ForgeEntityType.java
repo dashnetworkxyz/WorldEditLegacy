@@ -26,7 +26,7 @@ import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.IProjectile;
 //#if MC>11102
-//$$import net.minecraft.entity.MultiPartEntityPart;
+import net.minecraft.entity.MultiPartEntityPart;
 //#endif
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityBoat;
@@ -149,9 +149,9 @@ public class ForgeEntityType implements EntityType {
     @Override
     public boolean isPasteable() {
         //#if MC>11102
-        //$$return !(entity instanceof EntityPlayerMP || entity instanceof MultiPartEntityPart);
+        return !(entity instanceof EntityPlayerMP || entity instanceof MultiPartEntityPart);
         //#else
-        return !(entity instanceof EntityPlayerMP);
+        //$$return !(entity instanceof EntityPlayerMP);
         //#endif
     }
 

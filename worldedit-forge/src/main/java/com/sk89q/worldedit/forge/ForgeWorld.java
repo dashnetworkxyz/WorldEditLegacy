@@ -58,20 +58,30 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+//#if MC>10809
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+//#else
+//$$import net.minecraft.util.BlockPos;
+//#endif
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+//#if MC>10809
 import net.minecraft.world.biome.Biome;
+//#endif
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
+//#if MC>10809
 import net.minecraft.world.gen.feature.WorldGenBirchTree;
+//#else
+//$$import net.minecraft.world.gen.feature.WorldGenForest;
+//#endif
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
 import net.minecraft.world.gen.feature.WorldGenMegaJungle;
 import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
@@ -102,9 +112,15 @@ public class ForgeWorld extends AbstractWorld {
     private static final Random random = new Random();
     private static final int UPDATE = 1, NOTIFY = 2;
 
+    //#if MC>10809
     private static final IBlockState JUNGLE_LOG = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
     private static final IBlockState JUNGLE_LEAF = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
     private static final IBlockState JUNGLE_SHRUB = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+    //#else
+    //$$private static final IBlockState JUNGLE_LOG = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+    //$$private static final IBlockState JUNGLE_LEAF = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+    //$$private static final IBlockState JUNGLE_SHRUB = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+    //#endif
     
     private final WeakReference<World> worldRef;
 
@@ -115,7 +131,7 @@ public class ForgeWorld extends AbstractWorld {
      */
     ForgeWorld(World world) {
         checkNotNull(world);
-        this.worldRef = new WeakReference<World>(world);
+        this.worldRef = new WeakReference<>(world);
     }
 
     /**
@@ -166,7 +182,11 @@ public class ForgeWorld extends AbstractWorld {
         int z = position.getBlockZ();
 
         // First set the block
-        Chunk chunk = world.getChunkFromChunkCoords(x >> 4, z >> 4);
+        //#if MC>11102
+        Chunk chunk = world.getChunk(x >> 4, z >> 4);
+        //#else
+        //$$Chunk chunk = world.getChunkFromChunkCoords(x >> 4, z >> 4);
+        //#endif
         BlockPos pos = new BlockPos(x, y, z);
         IBlockState old = chunk.getBlockState(pos);
         @SuppressWarnings("deprecation")
@@ -228,7 +248,11 @@ public class ForgeWorld extends AbstractWorld {
     @Override
     public BaseBiome getBiome(Vector2D position) {
         checkNotNull(position);
+        //#if MC>10809
         return new BaseBiome(Biome.getIdForBiome(getWorld().getBiomeForCoordsBody(new BlockPos(position.getBlockX(), 0, position.getBlockZ()))));
+        //#else
+        //$$return new BaseBiome(getWorld().getBiomeGenForCoords(new BlockPos(position.getBlockX(), 0, position.getBlockZ())).biomeID);
+        //#endif
     }
 
     @Override
@@ -236,7 +260,11 @@ public class ForgeWorld extends AbstractWorld {
         checkNotNull(position);
         checkNotNull(biome);
 
-        Chunk chunk = getWorld().getChunkFromBlockCoords(new BlockPos(position.getBlockX(), 0, position.getBlockZ()));
+        //#if MC>11102
+        Chunk chunk = getWorld().getChunk(new BlockPos(position.getBlockX(), 0, position.getBlockZ()));
+        //#else
+        //$$Chunk chunk = getWorld().getChunkFromBlockCoords(new BlockPos(position.getBlockX(), 0, position.getBlockZ()));
+        //#endif
         if (chunk.isLoaded()) {
             chunk.getBiomeArray()[((position.getBlockZ() & 0xF) << 4 | position.getBlockX() & 0xF)] = (byte) biome.getId();
             return true;
@@ -250,9 +278,14 @@ public class ForgeWorld extends AbstractWorld {
         Item nativeItem = Item.getItemById(item.getType());
         ItemStack stack = new ItemStack(nativeItem, 1, item.getData());
         World world = getWorld();
+        //#if MC>10809
         EnumActionResult used = stack.onItemUse(new WorldEditFakePlayer((WorldServer) world), world, ForgeAdapter.toBlockPos(position),
                 EnumHand.MAIN_HAND, ForgeAdapter.adapt(face), 0, 0, 0);
         return used != EnumActionResult.FAIL;
+        //#else
+        //$$return stack.onItemUse(new WorldEditFakePlayer((WorldServer) world), world, ForgeAdapter.toBlockPos(position),
+        //$$        ForgeAdapter.adapt(face), 0, 0, 0);
+        //#endif
     }
 
     @Override
@@ -267,9 +300,9 @@ public class ForgeWorld extends AbstractWorld {
         EntityItem entity = new EntityItem(getWorld(), position.getX(), position.getY(), position.getZ(), ForgeWorldEdit.toForgeItemStack(item));
         entity.setPickupDelay(10);
         //#if MC>10904
-        //$$getWorld().spawnEntity(entity);
+        getWorld().spawnEntity(entity);
         //#else
-        getWorld().spawnEntityInWorld(entity);
+        //$$getWorld().spawnEntityInWorld(entity);
         //#endif
     }
 
@@ -290,12 +323,17 @@ public class ForgeWorld extends AbstractWorld {
 
         MinecraftServer server = originalWorld.getMinecraftServer();
         AnvilSaveHandler saveHandler = new AnvilSaveHandler(saveFolder,
+        //#if MC>10809
                 originalWorld.getSaveHandler().getWorldDirectory().getName(), true, server.getDataFixer());
         World freshWorld = new WorldServer(server, saveHandler, originalWorld.getWorldInfo(), originalWorld.provider.getDimension(),
+        //#else
+        //$$        originalWorld.getSaveHandler().getWorldDirectory().getName(), true);
+        //$$World freshWorld = new WorldServer(server, saveHandler, originalWorld.getWorldInfo(), originalWorld.provider.getDimensionId(),
+        //#endif
                 //#if MC>11002
-                //$$originalWorld.profiler
+                originalWorld.profiler
                 //#else
-                originalWorld.theProfiler
+                //$$originalWorld.theProfiler
                 //#endif
         ).init();
 
@@ -303,7 +341,11 @@ public class ForgeWorld extends AbstractWorld {
         // We need to also pull one more chunk in every direction
         CuboidRegion expandedPreGen = new CuboidRegion(region.getMinimumPoint().subtract(16, 0, 16), region.getMaximumPoint().add(16, 0, 16));
         for (Vector2D chunk : expandedPreGen.getChunks()) {
-            freshWorld.getChunkFromChunkCoords(chunk.getBlockX(), chunk.getBlockZ());
+            //#if MC>11102
+            freshWorld.getChunk(chunk.getBlockX(), chunk.getBlockZ());
+            //#else
+            //$$freshWorld.getChunkFromChunkCoords(chunk.getBlockX(), chunk.getBlockZ());
+            //#endif
         }
         
         ForgeWorld from = new ForgeWorld(freshWorld);
@@ -315,8 +357,13 @@ public class ForgeWorld extends AbstractWorld {
             throw new RuntimeException(e);
         } finally {
             saveFolder.delete();
+            //#if MC>10809
             DimensionManager.setWorld(originalWorld.provider.getDimension(), null, server);
             DimensionManager.setWorld(originalWorld.provider.getDimension(), originalWorld, server);
+            //#else
+            //$$DimensionManager.setWorld(originalWorld.provider.getDimensionId(), null);
+            //$$DimensionManager.setWorld(originalWorld.provider.getDimensionId(), originalWorld);
+            //#endif
         }
 
         return true;
@@ -329,18 +376,31 @@ public class ForgeWorld extends AbstractWorld {
             case BIG_TREE: return new WorldGenBigTree(true);
             case REDWOOD: return new WorldGenTaiga2(true);
             case TALL_REDWOOD: return new WorldGenTaiga1();
+            //#if MC>10809
             case BIRCH: return new WorldGenBirchTree(true, false);
+            //#else
+            //$$case BIRCH: return new WorldGenForest(true, false);
+            //#endif
             case JUNGLE: return new WorldGenMegaJungle(true, 10, 20, JUNGLE_LOG, JUNGLE_LEAF);
             case SMALL_JUNGLE: return new WorldGenTrees(true, 4 + random.nextInt(7), JUNGLE_LOG, JUNGLE_LEAF, false);
             case SHORT_JUNGLE: return new WorldGenTrees(true, 4 + random.nextInt(7), JUNGLE_LOG, JUNGLE_LEAF, true);
             case JUNGLE_BUSH: return new WorldGenShrub(JUNGLE_LOG, JUNGLE_SHRUB);
+            //#if MC>10809
             case RED_MUSHROOM: return new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK);
             case BROWN_MUSHROOM: return new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK);
+            //#else
+            //$$case RED_MUSHROOM: return new WorldGenBigMushroom(Blocks.brown_mushroom_block);
+            //$$case BROWN_MUSHROOM: return new WorldGenBigMushroom(Blocks.red_mushroom_block);
+            //#endif
             case SWAMP: return new WorldGenSwamp();
             case ACACIA: return new WorldGenSavannaTree(true);
             case DARK_OAK: return new WorldGenCanopyTree(true);
             case MEGA_REDWOOD: return new WorldGenMegaPineTree(false, random.nextBoolean());
+            //#if MC>10809
             case TALL_BIRCH: return new WorldGenBirchTree(true, true);
+            //#else
+            //$$case TALL_BIRCH: return new WorldGenForest(true, true);
+            //#endif
             case RANDOM:
             case PINE:
             case RANDOM_REDWOOD:
@@ -438,9 +498,9 @@ public class ForgeWorld extends AbstractWorld {
     public Entity createEntity(Location location, BaseEntity entity) {
         World world = getWorld();
         //#if MC>11002
-        //$$net.minecraft.entity.Entity createdEntity = EntityList.createEntityByIDFromName(new ResourceLocation(entity.getTypeId()), world);
+        net.minecraft.entity.Entity createdEntity = EntityList.createEntityByIDFromName(new ResourceLocation(entity.getTypeId()), world);
         //#else
-        net.minecraft.entity.Entity createdEntity = EntityList.createEntityByName(entity.getTypeId(), world);
+        //$$net.minecraft.entity.Entity createdEntity = EntityList.createEntityByName(entity.getTypeId(), world);
         //#endif
 
         if (createdEntity != null) {
@@ -459,9 +519,9 @@ public class ForgeWorld extends AbstractWorld {
             createdEntity.setLocationAndAngles(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 
             //#if MC>10904
-            //$$world.spawnEntity(createdEntity);
+            world.spawnEntity(createdEntity);
             //#else
-            world.spawnEntityInWorld(createdEntity);
+            //$$world.spawnEntityInWorld(createdEntity);
             //#endif
             return new ForgeEntity(createdEntity);
         } else {

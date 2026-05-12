@@ -51,9 +51,9 @@ public class GuiReferenceCard extends GuiScreen {
     protected void actionPerformed(GuiButton button) {
         if (button.id == 0) {
             //#if MC>10904
-            //$$this.mc.player.closeScreen();
+            this.mc.player.closeScreen();
             //#else
-            this.mc.thePlayer.closeScreen();
+            //$$this.mc.thePlayer.closeScreen();
             //#endif
         }
     }

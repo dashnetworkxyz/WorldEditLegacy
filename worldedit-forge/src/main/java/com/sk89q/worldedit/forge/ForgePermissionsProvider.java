@@ -24,9 +24,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import net.minecraft.command.ICommand;
 import net.minecraft.entity.player.EntityPlayerMP;
 //#if MC>10904
-//$$import net.minecraft.world.GameType;
+import net.minecraft.world.GameType;
 //#else
-import net.minecraft.world.WorldSettings.GameType;
+//$$import net.minecraft.world.WorldSettings.GameType;
 //#endif
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
@@ -48,8 +48,13 @@ public interface ForgePermissionsProvider {
         public boolean hasPermission(EntityPlayerMP player, String permission) {
             ForgeConfiguration configuration = platform.getConfiguration();
             return configuration.cheatMode ||
+                    //#if MC>10809
                     FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().canSendCommands(player.getGameProfile()) ||
                     (configuration.creativeEnable && player.interactionManager.getGameType() == GameType.CREATIVE);
+                    //#else
+                    //$$FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().canSendCommands(player.getGameProfile()) ||
+                    //$$(configuration.creativeEnable && player.theItemInWorldManager.getGameType() == GameType.CREATIVE);
+                    //#endif
         }
 
         @Override

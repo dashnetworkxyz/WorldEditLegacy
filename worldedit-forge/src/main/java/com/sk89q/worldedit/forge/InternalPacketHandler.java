@@ -17,6 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+//#if MC>10809
 package com.sk89q.worldedit.forge;
 
 import java.nio.charset.Charset;
@@ -41,3 +42,4 @@ public class InternalPacketHandler {
     }
 
 }
+//#endif

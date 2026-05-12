@@ -26,7 +26,11 @@ import javax.annotation.Nullable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
+//#if MC>10809
 import net.minecraft.util.math.BlockPos;
+//#else
+//$$import net.minecraft.util.BlockPos;
+//#endif
 import net.minecraft.world.World;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -96,9 +100,13 @@ final class TileEntityUtils {
         if (tag != null) {
             updateForSet(tag, position);
             //#if MC>10904
-            //$$TileEntity tileEntity = TileEntity.create(world, tag);
+            TileEntity tileEntity = TileEntity.create(world, tag);
             //#else
-            TileEntity tileEntity = TileEntity.create(tag);
+                //#if MC>10809
+                //$$TileEntity tileEntity = TileEntity.create(tag);
+                //#else
+                //$$TileEntity tileEntity = TileEntity.createAndLoadEntity(tag);
+                //#endif
             //#endif
 
             if (tileEntity != null) {

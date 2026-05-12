@@ -35,8 +35,14 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.server.MinecraftServer;
+//#if MC>10809
 import net.minecraft.server.management.PlayerList;
+//#else
+//$$import net.minecraft.server.management.ServerConfigurationManager;
+//#endif
+//#if MC>11002
 import net.minecraft.util.ResourceLocation;
+//#endif
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -78,15 +84,25 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
             }
         }
 
+        //#if MC>10809
         for (Item item : Item.REGISTRY) {
+        //#else
+        //$$for (Item item : Item.itemRegistry) {
+        //#endif
             if (item == null) continue;
-            if (item.getUnlocalizedName().startsWith("item.")) {
-                if (item.getUnlocalizedName().equalsIgnoreCase("item." + name)) return Item.getIdFromItem(item);
+            //#if MC>11102
+            String key = item.getTranslationKey();
+            //#else
+            //$$String key = item.getUnlocalizedName();
+            //#endif
+
+            if (key.startsWith("item.")) {
+                if (key.equalsIgnoreCase("item." + name)) return Item.getIdFromItem(item);
             }
-            if (item.getUnlocalizedName().startsWith("tile.")) {
-                if (item.getUnlocalizedName().equalsIgnoreCase("tile." + name)) return Item.getIdFromItem(item);
+            if (key.startsWith("tile.")) {
+                if (key.equalsIgnoreCase("tile." + name)) return Item.getIdFromItem(item);
             }
-            if (item.getUnlocalizedName().equalsIgnoreCase(name)) return Item.getIdFromItem(item);
+            if (key.equalsIgnoreCase(name)) return Item.getIdFromItem(item);
         }
         return -1;
     }
@@ -94,9 +110,13 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
     @Override
     public boolean isValidMobType(String type) {
         //#if MC>11002
-        //$$return EntityList.isRegistered(new ResourceLocation(type));
+        return EntityList.isRegistered(new ResourceLocation(type));
         //#else
-        return EntityList.NAME_TO_CLASS.containsKey(type);
+            //#if MC>10809
+            //$$return EntityList.NAME_TO_CLASS.containsKey(type);
+            //#else
+            //$$return EntityList.stringToClassMapping.containsKey(type);
+            //#endif
         //#endif
     }
 
@@ -128,7 +148,11 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
         if (player instanceof ForgePlayer) {
             return player;
         } else {
+            //#if MC>10809
             EntityPlayerMP entity = server.getPlayerList().getPlayerByUsername(player.getName());
+            //#else
+            //$$EntityPlayerMP entity = server.getConfigurationManager().getPlayerByUsername(player.getName());
+            //#endif
             return entity != null ? new ForgePlayer(entity) : null;
         }
     }
@@ -209,12 +233,16 @@ class ForgePlatform extends AbstractPlatform implements MultiUserPlatform {
     @Override
     public Collection<Actor> getConnectedUsers() {
         List<Actor> users = new ArrayList<>();
+        //#if MC>10809
         PlayerList scm = server.getPlayerList();
+        //#else
+        //$$ServerConfigurationManager scm = server.getConfigurationManager();
+        //#endif
 
         //#if MC>10904
-        //$$for (EntityPlayerMP entity : scm.getPlayers()) {
+        for (EntityPlayerMP entity : scm.getPlayers()) {
         //#else
-        for (EntityPlayerMP entity : scm.getPlayerList()) {
+        //$$for (EntityPlayerMP entity : scm.getPlayerList()) {
         //#endif
             if (entity != null) {
                 users.add(new ForgePlayer(entity));

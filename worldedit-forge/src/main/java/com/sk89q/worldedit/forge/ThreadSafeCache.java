@@ -42,7 +42,7 @@ public class ThreadSafeCache {
     private long lastRefresh = 0;
 
     /**
-     * Get an concurrent-safe set of UUIDs of online players.
+     * Get a concurrent-safe set of UUIDs of online players.
      *
      * @return a set of UUIDs
      */
@@ -55,25 +55,32 @@ public class ThreadSafeCache {
         long now = System.currentTimeMillis();
 
         if (now - lastRefresh > REFRESH_DELAY) {
-            Set<UUID> onlineIds = new HashSet<UUID>();
-            
+            Set<UUID> onlineIds = new HashSet<>();
             MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
+            //#if MC>10809
             if (server == null) {
+            //#else
+            //$$if (server == null || server.getConfigurationManager() == null) {
+            //#endif
                 return;
             }
 
             //#if MC>10904
-            //$$for (EntityPlayerMP player : server.getPlayerList().getPlayers()) {
+            for (EntityPlayerMP player : server.getPlayerList().getPlayers()) {
             //#else
-            for (EntityPlayerMP player : server.getPlayerList().getPlayerList()) {
-            //#endif
+                //#if MC>10809
+                //$$for (EntityPlayerMP player : server.getPlayerList().getPlayerList()) {
+                //#else
+                //$$for (EntityPlayerMP player : server.getConfigurationManager().getPlayerList()) {
+                //#endif
                 if (player != null) {
                     onlineIds.add(player.getUniqueID());
                 }
+            //#endif
             }
 
-            this.onlineIds = new CopyOnWriteArraySet<UUID>(onlineIds);
+            this.onlineIds = new CopyOnWriteArraySet<>(onlineIds);
 
             lastRefresh = now;
         }

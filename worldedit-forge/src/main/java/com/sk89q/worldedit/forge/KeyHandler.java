@@ -43,11 +43,11 @@ public class KeyHandler {
     @SubscribeEvent
     public void onKey(KeyInputEvent evt) {
         //#if MC>10904
-        //$$EntityPlayerSP player = mc.player;
-        //$$WorldClient world = mc.world;
+        EntityPlayerSP player = mc.player;
+        WorldClient world = mc.world;
         //#else
-        EntityPlayerSP player = mc.thePlayer;
-        WorldClient world = mc.theWorld;
+        //$$EntityPlayerSP player = mc.thePlayer;
+        //$$WorldClient world = mc.theWorld;
         //#endif
 
         if (player != null && world != null && mainKey.isPressed()) {

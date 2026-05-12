@@ -37,10 +37,16 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+//#if MC>10809
 import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+//#else
+//$$import net.minecraft.network.play.server.S3FPacketCustomPayload;
+//$$import net.minecraft.util.ChatComponentText;
+//$$import net.minecraft.util.EnumChatFormatting;
+//#endif
 
 public class ForgePlayer extends AbstractPlayerActor {
 
@@ -58,7 +64,11 @@ public class ForgePlayer extends AbstractPlayerActor {
 
     @Override
     public int getItemInHand() {
+        //#if MC>10809
         ItemStack is = this.player.getHeldItem(EnumHand.MAIN_HAND);
+        //#else
+        //$$ItemStack is = this.player.getHeldItem();
+        //#endif
         return Item.getIdFromItem(is.getItem());
     }
 
@@ -77,9 +87,9 @@ public class ForgePlayer extends AbstractPlayerActor {
         Vector position = new Vector(this.player.posX, this.player.posY, this.player.posZ);
         return new Location(
                 //#if MC>10904
-                //$$ForgeWorldEdit.inst.getWorld(this.player.world),
+                ForgeWorldEdit.inst.getWorld(this.player.world),
                 //#else
-                ForgeWorldEdit.inst.getWorld(this.player.worldObj),
+                //$$ForgeWorldEdit.inst.getWorld(this.player.worldObj),
                 //#endif
                 position,
                 this.player.rotationYaw,
@@ -91,9 +101,9 @@ public class ForgePlayer extends AbstractPlayerActor {
     public WorldVector getPosition() {
         return new WorldVector(LocalWorldAdapter.adapt(ForgeWorldEdit.inst.getWorld(
                 //#if MC>10904
-                //$$this.player.world
+                this.player.world
                 //#else
-                this.player.worldObj
+                //$$this.player.worldObj
                 //#endif
         )), this.player.posX, this.player.posY, this.player.posZ);
     }
@@ -102,9 +112,9 @@ public class ForgePlayer extends AbstractPlayerActor {
     public com.sk89q.worldedit.world.World getWorld() {
         return ForgeWorldEdit.inst.getWorld(
                 //#if MC>10904
-                //$$this.player.world
+                this.player.world
                 //#else
-                this.player.worldObj
+                //$$this.player.worldObj
                 //#endif
         );
     }
@@ -132,51 +142,85 @@ public class ForgePlayer extends AbstractPlayerActor {
             send = send + "|" + StringUtil.joinString(params, "|");
         }
         PacketBuffer buffer = new PacketBuffer(Unpooled.copiedBuffer(send.getBytes(WECUIPacketHandler.UTF_8_CHARSET)));
+        //#if MC>10809
         SPacketCustomPayload packet = new SPacketCustomPayload(ForgeWorldEdit.CUI_PLUGIN_CHANNEL, buffer);
         this.player.connection.sendPacket(packet);
+        //#else
+        //$$S3FPacketCustomPayload packet = new S3FPacketCustomPayload(ForgeWorldEdit.CUI_PLUGIN_CHANNEL, buffer);
+        //$$this.player.playerNetServerHandler.sendPacket(packet);
+        //#endif
     }
 
     @Override
     public void printRaw(String msg) {
         for (String part : msg.split("\n")) {
             //#if MC>10904
-            //$$this.player.sendMessage(new TextComponentString(part));
+            this.player.sendMessage(new TextComponentString(part));
             //#else
-            this.player.addChatMessage(new TextComponentString(part));
+                //#if MC>10809
+                //$$this.player.addChatMessage(new TextComponentString(part));
+                //#else
+                //$$this.player.addChatMessage(new ChatComponentText(part));
+                //#endif
             //#endif
         }
     }
 
     @Override
     public void printDebug(String msg) {
+        //#if MC>10809
         sendColorized(msg, TextFormatting.GRAY);
+        //#else
+        //$$sendColorized(msg, EnumChatFormatting.GRAY);
+        //#endif
     }
 
     @Override
     public void print(String msg) {
+        //#if MC>10809
         sendColorized(msg, TextFormatting.LIGHT_PURPLE);
+        //#else
+        //$$sendColorized(msg, EnumChatFormatting.LIGHT_PURPLE);
+        //#endif
     }
 
     @Override
     public void printError(String msg) {
+        //#if MC>10809
         sendColorized(msg, TextFormatting.RED);
+        //#else
+        //$$sendColorized(msg, EnumChatFormatting.RED);
+        //#endif
     }
 
+    //#if MC>10809
     private void sendColorized(String msg, TextFormatting formatting) {
+    //#else
+    //$$private void sendColorized(String msg, EnumChatFormatting formatting) {
+    //#endif
         for (String part : msg.split("\n")) {
+            //#if MC>10809
             TextComponentString component = new TextComponentString(part);
             component.getStyle().setColor(formatting);
-            //#if MC>10904
-            //$$this.player.sendMessage(component);
             //#else
-            this.player.addChatMessage(component);
+            //$$ChatComponentText component = new ChatComponentText(part);
+            //$$component.getChatStyle().setColor(formatting);
+            //#endif
+            //#if MC>10904
+            this.player.sendMessage(component);
+            //#else
+            //$$this.player.addChatMessage(component);
             //#endif
         }
     }
 
     @Override
     public void setPosition(Vector pos, float pitch, float yaw) {
+        //#if MC>10809
         this.player.connection.setPlayerLocation(pos.getX(), pos.getY(), pos.getZ(), yaw, pitch);
+        //#else
+        //$$this.player.playerNetServerHandler.setPlayerLocation(pos.getX(), pos.getY(), pos.getZ(), yaw, pitch);
+        //#endif
     }
 
     @Override
