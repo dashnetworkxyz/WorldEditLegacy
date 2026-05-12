@@ -32,12 +32,6 @@ allprojects {
         mappings "de.oceanlabs.mcp:mcp_stable:$mappingsVersion"
         forge "net.minecraftforge:forge:$forgeVersion"
     }
-
-    loom {
-        forge {
-            pack200Provider.set(Pack200Adapter.getDeclaredConstructor().newInstance())
-        }
-    }
 }
 
 subprojects {
@@ -49,6 +43,8 @@ subprojects {
 
     loom {
         forge {
+            pack200Provider.set(Pack200Adapter.getDeclaredConstructor().newInstance())
+
             if (transformerFile.exists()) {
                 println('Installing access transformer')
                 accessTransformer(transformerFile)
