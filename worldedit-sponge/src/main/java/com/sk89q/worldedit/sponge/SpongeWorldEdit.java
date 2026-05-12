@@ -61,9 +61,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * The Sponge implementation of WorldEdit.
  */
-@Plugin(id = SpongeWorldEdit.MOD_ID, name = "WorldEdit",
-        description = "WorldEdit is an easy-to-use in-game world editor for Minecraft",
-        url = "http://www.enginehub.org/worldedit")
+@Plugin(id = SpongeWorldEdit.MOD_ID)
 public class SpongeWorldEdit {
 
     @Inject

@@ -1,6 +1,7 @@
 name: WorldEdit
 main: com.sk89q.worldedit.bukkit.WorldEditPlugin
 version: "${internalVersion}"
+description: "WorldEdit is an easy-to-use in-game world editor for Minecraft"
 softdepend: [Spout] #hack to fix trove errors
 
 # Permissions aren't here. Read http://wiki.sk89q.com/wiki/WEPIF/DinnerPerms

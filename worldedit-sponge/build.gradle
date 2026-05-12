@@ -1,36 +1,51 @@
+import org.spongepowered.gradle.plugin.config.PluginLoaders
+import org.spongepowered.plugin.metadata.model.PluginDependency
+
 buildscript {
     repositories {
         mavenCentral()
-        maven { url = "http://files.minecraftforge.net/maven" }
-        maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
-        jcenter()
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public' }
+        maven { url = 'https://maven.minecraftforge.net' }
+    }
+
+    dependencies {
+        classpath 'org.spongepowered.gradle.plugin:org.spongepowered.gradle.plugin.gradle.plugin:2.3.0'
     }
 }
 
-plugins {
-    id 'signing'
-    id 'org.spongepowered.plugin' version '0.8.1'
-}
+apply plugin: 'org.spongepowered.gradle.plugin'
 
 dependencies {
-    compile project(':worldedit-core')
-    compile 'org.spongepowered:spongeapi:7.0.0-SNAPSHOT'
-    testCompile group: 'org.mockito', name: 'mockito-core', version:'1.9.0-rc1'
+    implementation project(':worldedit-core')
+    implementation 'org.spongepowered:spongeapi:7.0.0-SNAPSHOT'
+    testImplementation "org.mockito:mockito-core:1.9.0-rc1"
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
 sponge {
-    plugin {
-        id = 'worldedit'
+    apiVersion('7.4.0')
+    license('GPL-v3.0')
+    loader {
+        name(PluginLoaders.JAVA_PLAIN)
+        version('1.0')
+    }
+    plugin('worldedit') {
+        entrypoint('com.sk89q.worldedit.sponge.SpongeWorldEdit')
+        displayName('WorldEdit')
+        version(version)
+        description("WorldEdit is an easy-to-use in-game world editor for Minecraft")
+        dependency("spongeapi") {
+            loadOrder(PluginDependency.LoadOrder.AFTER)
+            optional(false)
+        }
     }
 }
 
 jar {
     manifest {
-        attributes("Class-Path": "truezip.jar WorldEdit/truezip.jar js.jar WorldEdit/js.jar",
-                "WorldEdit-Version": version)
+        attributes(
+                "Class-Path": "truezip.jar WorldEdit/truezip.jar js.jar WorldEdit/js.jar",
+                "WorldEdit-Version": version
+        )
     }
 }
 
@@ -42,9 +57,4 @@ shadowJar {
 
 artifacts {
     archives shadowJar
-}
-
-signing {
-    required false
-    sign shadowJar
 }
