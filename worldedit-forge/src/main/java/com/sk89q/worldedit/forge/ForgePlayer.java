@@ -69,6 +69,9 @@ public class ForgePlayer extends AbstractPlayerActor {
         //#else
         //$$ItemStack is = this.player.getHeldItem();
         //#endif
+
+        if (is == null) return 0;
+
         return Item.getIdFromItem(is.getItem());
     }
 

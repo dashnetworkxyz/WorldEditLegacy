@@ -126,11 +126,7 @@ class ForgeBiomeRegistry implements BiomeRegistry {
 
         @Override
         public String getName() {
-            //#if MC>10809
-            return biome.getBiomeName();
-            //#else
-            //$$return biome.biomeName;
-            //#endif
+            return biome.biomeName;
         }
     }
 

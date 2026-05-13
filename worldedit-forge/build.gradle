@@ -47,9 +47,16 @@ dependencies {
     forge "net.minecraftforge:forge:${versions[minecraftVersion].forge}"
 }
 
+final File transformerFile = file 'src/main/resources/worldedit_at.cfg'
+
 loom {
     forge {
         pack200Provider.set(Pack200Adapter.getDeclaredConstructor().newInstance())
+
+        if (transformerFile.exists()) {
+            println('Installing access transformer')
+            accessTransformer(transformerFile)
+        }
     }
 }
 
@@ -84,6 +91,10 @@ tasks.withType(Jar).configureEach {
     archiveBaseName.set("worldedit-forge-$minecraftVersion")
     manifest.attributes['FMLCorePluginContainsFMLMod'] = 'true'
     manifest.attributes['ForceLoadAsMod'] = 'true'
+
+    if (transformerFile.exists()) {
+        manifest.attributes['FMLAT'] = 'worldedit_at.cfg'
+    }
 }
 
 remapJar {

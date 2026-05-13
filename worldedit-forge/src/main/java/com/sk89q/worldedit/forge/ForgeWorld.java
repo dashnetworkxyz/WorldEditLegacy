@@ -172,6 +172,11 @@ public class ForgeWorld extends AbstractWorld {
     }
 
     @Override
+    public int getMaxY() {
+        return getWorld().getHeight() - 1;
+    }
+
+    @Override
     public boolean setBlock(Vector position, BaseBlock block, boolean notifyAndLight) throws WorldEditException {
         checkNotNull(position);
         checkNotNull(block);
@@ -192,7 +197,7 @@ public class ForgeWorld extends AbstractWorld {
         @SuppressWarnings("deprecation")
         IBlockState newState = Block.getBlockById(block.getId()).getStateFromMeta(block.getData());
         IBlockState successState = chunk.setBlockState(pos, newState);
-        boolean successful = successState != null;
+        boolean successful = successState != null || old == newState;
 
         // Create the TileEntity
         if (successful) {
