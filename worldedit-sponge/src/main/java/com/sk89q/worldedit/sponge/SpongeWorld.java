@@ -23,10 +23,10 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.entity.BaseEntity;
@@ -70,7 +70,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class SpongeWorld extends AbstractWorld {
 
     private static final Logger log = LoggerFactory.getLogger(SpongeWorld.class);
-
     private final WeakReference<World> worldRef;
 
     /**
@@ -154,13 +153,16 @@ public abstract class SpongeWorld extends AbstractWorld {
 
     @Override
     public boolean regenerate(Region region, EditSession editSession) {
-        WorldProperties tempWorldProperties;
         Server server = Sponge.getServer();
-        String id = "regenArchetype" + getWorld().getName();
-        WorldArchetype regenerationArchetype = Sponge.getRegistry().getType(WorldArchetype.class, id).orElseGet(
-                () -> WorldArchetype.builder().from(getWorld().getProperties()).serializationBehavior(SerializationBehaviors.NONE).build(id, id)
-        );
 
+        final String id = "regenArchetype" + getWorld().getName();
+        final WorldArchetype regenerationArchetype = Sponge.getRegistry().getType(WorldArchetype.class, id)
+                .orElseGet(() -> WorldArchetype.builder()
+                        .from(getWorld().getProperties())
+                        .serializationBehavior(SerializationBehaviors.NONE)
+                        .build(id, id));
+
+        WorldProperties tempWorldProperties;
         try {
             tempWorldProperties = server.createWorldProperties("worldedittemp", regenerationArchetype);
             tempWorldProperties.setGenerateSpawnOnLoad(false);
@@ -170,29 +172,29 @@ public abstract class SpongeWorld extends AbstractWorld {
         }
 
         Optional<World> tempWorldOpt = server.loadWorld(tempWorldProperties);
-
         if (!tempWorldOpt.isPresent()) {
             log.error("Failed to load temp world");
             return false;
         }
 
         World freshWorld = tempWorldOpt.get();
-
         try {
+            // Pre-gen all the chunks
+            // We need to also pull one more chunk in every direction
             CuboidRegion expandedPreGen = new CuboidRegion(region.getMinimumPoint().subtract(16, 0, 16), region.getMaximumPoint().add(16, 0, 16));
-
             for (Vector2D chunk : expandedPreGen.getChunks()) {
                 freshWorld.getChunk(chunk.getBlockX(), 0, chunk.getBlockZ());
             }
 
             SpongeWorld from = SpongeWorldEdit.inst().getWorld(freshWorld);
-
             for (BlockVector vec : region) {
-                editSession.setBlock((Vector) vec, from.getBlock((Vector) vec));
+                editSession.setBlock(vec, from.getBlock(vec));
             }
+
         } catch (MaxChangedBlocksException e) {
             throw new RuntimeException(e);
         } finally {
+            // Remove temp world
             server.unloadWorld(freshWorld);
             server.deleteWorld(tempWorldProperties);
         }
@@ -274,7 +276,7 @@ public abstract class SpongeWorld extends AbstractWorld {
             SpongeWorld other = ((SpongeWorld) o);
             World otherWorld = other.worldRef.get();
             World thisWorld = worldRef.get();
-            return otherWorld != null && thisWorld != null && otherWorld.equals(thisWorld);
+            return otherWorld != null && otherWorld.equals(thisWorld);
         } else {
             return o instanceof com.sk89q.worldedit.world.World
                     && ((com.sk89q.worldedit.world.World) o).getName().equals(getName());
