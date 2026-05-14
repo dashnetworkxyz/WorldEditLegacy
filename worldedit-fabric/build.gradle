@@ -1,0 +1,37 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.fabricmc.net' }
+        maven { url = 'https://maven.legacyfabric.net' }
+    }
+
+    dependencies {
+        classpath "fabric-loom:fabric-loom.gradle.plugin:$loomVersion"
+        classpath "legacy-looming:legacy-looming.gradle.plugin:$loomVersion"
+    }
+}
+
+apply plugin: 'fabric-loom'
+apply plugin: 'legacy-looming'
+
+legacyLooming {
+    intermediaryVersion = 2
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:$minecraftVersion"
+    mappings "net.legacyfabric:yarn:1.8.9+build.$yarnBuild:v2"
+    modImplementation "net.fabricmc:fabric-loader:$loaderVersion"
+    modImplementation "net.legacyfabric.legacy-fabric-api:legacy-fabric-api:$fabricApiVersion"
+}
+
+processResources {
+    filesMatching('fabric.mod.json') {
+        expand(
+                internalVersion: version,
+                minecraftVersion: minecraftVersion,
+                loaderVersion: loaderVersion,
+                fabricApiVersion: fabricApiVersion
+        )
+    }
+}

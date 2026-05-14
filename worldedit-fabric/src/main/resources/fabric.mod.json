@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "worldedit",
+  "name": "WorldEdit",
+  "version": "${internalVersion}",
+  "description": "WorldEdit is an easy-to-use in-game world editor for Minecraft",
+  "license": "GPL-v3.0",
+  "icon": "assets/worldedit/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": []
+  },
+  "depends": {
+    "minecraft": ">=${minecraftVersion}",
+    "fabricloader": ">=${loaderVersion}",
+    "legacy-fabric-api": ">=${fabricApiVersion}"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
