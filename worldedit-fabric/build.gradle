@@ -2,27 +2,31 @@ buildscript {
     repositories {
         gradlePluginPortal()
         maven { url = 'https://maven.fabricmc.net' }
-        maven { url = 'https://maven.legacyfabric.net' }
+        maven { url = 'https://maven.ornithemc.net/releases' }
     }
 
     dependencies {
         classpath "fabric-loom:fabric-loom.gradle.plugin:$loomVersion"
-        classpath "legacy-looming:legacy-looming.gradle.plugin:$loomVersion"
+        classpath "ploceus:ploceus.gradle.plugin:$loomVersion"
     }
 }
 
 apply plugin: 'fabric-loom'
-apply plugin: 'legacy-looming'
+apply plugin: 'ploceus'
 
-legacyLooming {
-    intermediaryVersion = 2
+ploceus {
+    setIntermediaryGeneration(2)
+}
+
+repositories {
+    maven { url = 'https://maven.legacyfabric.net' }
 }
 
 dependencies {
     implementation project(':worldedit-core')
 
     minecraft "com.mojang:minecraft:$minecraftVersion"
-    mappings "net.legacyfabric.v2:yarn:1.8.9+build.$yarnBuild"
+    mappings ploceus.featherMappings(featherBuild)
     modImplementation "net.fabricmc:fabric-loader:$loaderVersion"
     modImplementation "net.legacyfabric.legacy-fabric-api:legacy-fabric-api:$fabricApiVersion"
 }

@@ -24,9 +24,30 @@ public class FabricWorld extends AbstractWorld {
         this.worldRef = new WeakReference<>(world);
     }
 
+    /**
+     * Get the underlying handle to the world.
+     *
+     * @return the world
+     * @throws RuntimeException thrown if a reference to the world was lost (i.e. world was unloaded)
+     */
+    public World getWorld() {
+        World world = worldRef.get();
+
+        if (world != null) {
+            return world;
+        } else {
+            throw new RuntimeException("The reference to the world was lost (i.e. the world may have been unloaded)");
+        }
+    }
+
     @Override
     public String getName() {
-        throw new UnsupportedOperationException();
+        return getWorld().getData().getName();
+    }
+
+    @Override
+    public int getMaxY() {
+        return getWorld().getHeight() - 1;
     }
 
     @Override

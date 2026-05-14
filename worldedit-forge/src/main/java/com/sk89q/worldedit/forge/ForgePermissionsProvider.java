@@ -59,6 +59,7 @@ public interface ForgePermissionsProvider {
 
         @Override
         public void registerPermission(ICommand command, String permission) {}
+
     }
 
     class SpongePermissionsProvider implements ForgePermissionsProvider {
@@ -72,6 +73,7 @@ public interface ForgePermissionsProvider {
         public void registerPermission(ICommand command, String permission) {
 
         }
+
     }
 
 }
