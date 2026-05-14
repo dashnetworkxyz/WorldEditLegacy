@@ -19,8 +19,10 @@ legacyLooming {
 }
 
 dependencies {
+    implementation project(':worldedit-core')
+
     minecraft "com.mojang:minecraft:$minecraftVersion"
-    mappings "net.legacyfabric:yarn:1.8.9+build.$yarnBuild:v2"
+    mappings "net.legacyfabric.v2:yarn:1.8.9+build.$yarnBuild"
     modImplementation "net.fabricmc:fabric-loader:$loaderVersion"
     modImplementation "net.legacyfabric.legacy-fabric-api:legacy-fabric-api:$fabricApiVersion"
 }

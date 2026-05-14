@@ -8,7 +8,9 @@
   "icon": "assets/worldedit/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": []
+    "main": [
+      "com.sk89q.worldedit.fabric.FabricWorldEdit"
+    ]
   },
   "depends": {
     "minecraft": ">=${minecraftVersion}",

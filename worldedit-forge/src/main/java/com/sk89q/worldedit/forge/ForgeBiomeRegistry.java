@@ -40,7 +40,7 @@ import net.minecraft.world.biome.Biome;
  */
 class ForgeBiomeRegistry implements BiomeRegistry {
 
-    //#if MC<=10809
+    //#if MC<10900
     //$$private static Map<Integer, BiomeGenBase> biomes = Collections.emptyMap();
     //$$private static Map<Integer, BiomeData> biomeData = Collections.emptyMap();
     //#endif
@@ -75,7 +75,7 @@ class ForgeBiomeRegistry implements BiomeRegistry {
         //#endif
     }
 
-    //#if MC<=10809
+    //#if MC<10900
     /**
      * Populate the internal static list of biomes.
      *

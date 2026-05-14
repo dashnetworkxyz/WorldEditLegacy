@@ -118,7 +118,7 @@ public class ForgeWorldEdit {
             WorldEdit.getInstance().getPlatformManager().unregister(platform);
         }
 
-        //#if MC<=10809
+        //#if MC<10900
         ForgeBiomeRegistry.populate();
         //#endif
 
