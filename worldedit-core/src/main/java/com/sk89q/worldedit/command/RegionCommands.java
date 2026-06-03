@@ -260,8 +260,10 @@ public class RegionCommands {
         desc = "Move the contents of the selection",
         help =
             "Moves the contents of the selection.\n" +
-            "The -s flag shifts the selection to the target location.\n" +
-            "Optionally fills the old location with <leave-id>.",
+            "Optionally fills the old location with <leave-id>.\n" +
+            "Flags:\n" +
+            "  -s shifts the selection to the target location\n" +
+            "  -a skips air blocks",
         min = 0,
         max = 3
     )
