@@ -1,7 +1,7 @@
 ![WorldEdit](http://static.sk89q.com/readme/worldedit.png)
 =========
 
-WorldEdit is Minecraft mod that turns Minecraft into an in-game map editor (sorta, kinda).
+WorldEdit is a Minecraft mod that turns Minecraft into an in-game map editor (sorta, kinda).
 
 * Make awesome stuff with half the time OR make ***quadriply** awesome* creations with the same time :sparkles:
 * Get lost in hundreds of options and functions that even we've forgotten existed
