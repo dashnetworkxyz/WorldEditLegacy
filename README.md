@@ -1,34 +1,25 @@
-![WorldEdit](http://static.sk89q.com/readme/worldedit.png)
-=========
+# WorldEditLegacy
+This is a fork of WorldEdit 6, with changes to actually compile.
 
-WorldEdit is Minecraft mod that turns Minecraft into an in-game map editor (sorta, kinda).
+## Highlights
+- Support for Forge 1.8.9, 1.9.4, 1.10.2, 1.11.2, & 1.12.2 on latest version
+- Updated to Gradle 9
 
-* Make awesome stuff with half the time OR make ***quadriply** awesome* creations with the same time :sparkles:
-* Get lost in hundreds of options and functions that even we've forgotten existed
-* Utilize Photoshop-like tools like "selection areas" and "brushes"
-* Making fjords and other natural wonders with weird names
-* Also: fix grief, broken water, missing snow, raging fires, and other :poop:
+## Using
+You can get the latest version from [releases](https://github.com/dashnetworkxyz/WorldEditLegacy/releases)
 
-WorldEdit is open source!, so if you've just learned how to make a button blink, I probably recommend picking up a book on CS algorithms. The project is licensed using the GNU Lesser General Public License license, v3.
+## Compiling
+Building is still done with `gradlew build` but there are some new quirks.
 
-Compiling
----------
+The switch to Gradle 9 means JDK 17 or newer is now required to compile.<br>
+However, the compiled JAR is still compatible with Java 8.
 
-See [COMPILING.md](COMPILING.md) for a guide on compiling WorldEdit.
+By default, the Forge mod will be built for 1.12.2.<br>
+You will need to do one of the following for other Forge versions
 
-Contributing
-------------
-
-We happily accept contributions, especially through pull requests on GitHub.
-Submissions must be licensed under the GNU Lesser General Public License v3.
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for important guidelines to follow.
-
-Links
------
-
-* [Visit our website](http://www.enginehub.org/)
-* [IRC channel](http://skq.me/irc/irc.esper.net/sk89q/) (#sk89q on irc.esper.net)
-* [Issue tracker](http://youtrack.sk89q.com/issues/WORLDEDIT)
-* [Continuous integration](http://builds.enginehub.org) [![Build Status](https://travis-ci.org/sk89q/WorldEdit.svg?branch=master)](https://travis-ci.org/sk89q/WorldEdit)
-* [End-user documentation](http://wiki.sk89q.com/wiki/WorldEdit)
+```
+gradlew build :worldedit-forge -PmcVer=1.8.9
+gradlew build :worldedit-forge -PmcVer=1.9.4
+gradlew build :worldedit-forge -PmcVer=1.10.2
+gradlew build :worldedit-forge -PmcVer=1.11.2
+```
