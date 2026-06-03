@@ -1,5 +1,5 @@
 # WorldEditLegacy
-This is a fork of WorldEdit 6, with changes to actually compile.
+This is a fork of WorldEdit 6.1.10, with changes to actually compile.
 
 ## Highlights
 - Support for Forge 1.8.9, 1.9.4, 1.10.2, 1.11.2, & 1.12.2 on latest version
