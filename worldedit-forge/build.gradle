@@ -99,7 +99,7 @@ tasks.withType(Jar).configureEach {
 
 remapJar {
     archiveBaseName.set("worldedit-forge-$minecraftVersion")
-    archiveClassifier.set('')
+    archiveClassifier.set('dist')
     //noinspection GroovyAssignabilityCheck
     inputFile.set(tasks.shadowJar.archiveFile)
 }

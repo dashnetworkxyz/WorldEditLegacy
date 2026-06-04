@@ -47,12 +47,16 @@ jar {
                 "WorldEdit-Version": version
         )
     }
+
+    archiveVersion.set(version.toString())
 }
 
 shadowJar {
     dependencies {
         include(dependency(':worldedit-core'))
     }
+
+    archiveVersion.set(version.toString())
 }
 
 artifacts {
