@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.*;
 
 import static com.sk89q.minecraft.util.commands.Logging.LogMode.PLACEMENT;
 
@@ -515,17 +516,29 @@ public class UtilityCommands {
         desc = "Evaluate a mathematical expression"
     )
     @CommandPermissions("worldedit.calc")
-    public void calc(Actor actor, @Text String input) throws CommandException {
+    public void calc(final Actor actor, final @Text String input) {
+        CompletableFuture<Double> future = CompletableFuture.supplyAsync(() -> {
+            try {
+                Expression expression = Expression.compile(input);
+                return expression.evaluate();
+            } catch (EvaluationException e) {
+                actor.printError(String.format(
+                        "'%s' could not be parsed as a valid expression", input));
+                throw new CompletionException(e);
+            } catch (ExpressionException e) {
+                actor.printError(String.format(
+                        "'%s' could not be evaluated (error: %s)", input, e.getMessage()));
+                throw new CompletionException(e);
+            }
+        });
+
         try {
-            Expression expression = Expression.compile(input);
-            actor.print("= " + expression.evaluate());
-        } catch (EvaluationException e) {
-            actor.printError(String.format(
-                    "'%s' could not be parsed as a valid expression", input));
-        } catch (ExpressionException e) {
-            actor.printError(String.format(
-                    "'%s' could not be evaluated (error: %s)", input, e.getMessage()));
-        }
+            double evaluated = future.get(100, TimeUnit.MILLISECONDS); // TODO: add config for timeout
+            actor.print("= " + evaluated);
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            actor.printError("Calculations exceeded time limit");
+        } catch (InterruptedException | ExecutionException ignored) {}
     }
 
     @Command(
