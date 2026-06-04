@@ -17,13 +17,8 @@ dependencies {
 }
 
 processResources {
-    from (sourceSets.main.resources.srcDirs) {
-        expand 'internalVersion': rootProject.internalVersion
-        include 'plugin.yml'
-    }
-
-    from (sourceSets.main.resources.srcDirs) {
-        exclude 'plugin.yml'
+    filesMatching('plugin.yml') {
+        expand(internalVersion: version)
     }
 }
 
@@ -43,4 +38,4 @@ shadowJar {
     relocate 'com.google.gson', 'com.sk89q.worldedit.internal.gson'
 }
 
-tasks.build.dependsOn(tasks.shadowJar)
+build.dependsOn shadowJar
