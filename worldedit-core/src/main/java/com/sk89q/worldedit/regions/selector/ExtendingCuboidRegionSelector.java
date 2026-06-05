@@ -78,8 +78,8 @@ public class ExtendingCuboidRegionSelector extends CuboidRegionSelector {
      */
     public ExtendingCuboidRegionSelector(@Nullable World world, Vector position1, Vector position2) {
         this(world);
-        position1 = Vector.getMinimum(position1, position2);
-        position2 = Vector.getMaximum(position1, position2);
+        this.position1 = Vector.getMinimum(position1, position2).toBlockVector();
+        this.position2 = Vector.getMaximum(position1, position2).toBlockVector();
         region.setPos1(position1);
         region.setPos2(position2);
     }

@@ -21,7 +21,7 @@ println """
 
 allprojects {
     group = 'com.sk89q.worldedit'
-    version = '6.2.0'
+    version = '6.2.1-SNAPSHOT'
 }
 
 if (!project.hasProperty("gitCommitHash")) {
