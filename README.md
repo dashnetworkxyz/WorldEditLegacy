@@ -1,4 +1,4 @@
-# WorldEditLegacy
+# WorldEditLegacy [![Build Status](https://jenkins.dashnetwork.xyz/job/WorldEditLegacy/badge/icon)](https://jenkins.dashnetwork.xyz/job/WorldEditLegacy/)
 This is a fork of WorldEdit 6.1.10, with changes to actually compile.
 
 ## Highlights
