@@ -27,6 +27,7 @@ import com.sk89q.worldedit.function.mask.ExistingBlockMask;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.math.transform.Transform;
+import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.registry.WorldData;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,13 +38,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class PasteBuilder {
 
     private final Clipboard clipboard;
-    private final WorldData worldData;
     private final Transform transform;
     private final Extent targetExtent;
+
     private final WorldData targetWorldData;
 
-    private Vector to = new Vector();
+    private Vector to = Vector.ZERO;
     private boolean ignoreAirBlocks;
+    private boolean ignoreStructureVoidBlocks;
+    private boolean copyEntities = true;
+    private boolean copyBiomes;
+    private Region copyRegion;
 
     /**
      * Create a new instance.
@@ -57,10 +62,10 @@ public class PasteBuilder {
         checkNotNull(targetExtent);
         checkNotNull(targetWorldData);
         this.clipboard = holder.getClipboard();
-        this.worldData = holder.getWorldData();
         this.transform = holder.getTransform();
         this.targetExtent = targetExtent;
         this.targetWorldData = targetWorldData;
+        this.copyRegion = this.clipboard.getRegion();
     }
 
     /**

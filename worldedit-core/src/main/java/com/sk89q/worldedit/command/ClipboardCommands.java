@@ -72,6 +72,7 @@ public class ClipboardCommands {
         help = "Copy the selection to the clipboard\n" +
                 "Flags:\n" +
                 "  -e will also copy entities\n" +
+                "  -b will also copy biomes\n" +
                 "  -m sets a source mask so that excluded blocks become air\n" +
                 "WARNING: Pasting entities cannot yet be undone!",
         min = 0,
@@ -80,12 +81,13 @@ public class ClipboardCommands {
     @CommandPermissions("worldedit.clipboard.copy")
     public void copy(Player player, LocalSession session, EditSession editSession,
                      @Selection Region region, @Switch('e') boolean copyEntities,
-                     @Switch('m') Mask mask) throws WorldEditException {
+                     @Switch('b') boolean copyBiomes, @Switch('m') Mask mask) throws WorldEditException {
 
         BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
         clipboard.setOrigin(session.getPlacementPosition(player));
         ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, clipboard, region.getMinimumPoint());
         copy.setCopyingEntities(copyEntities);
+        copy.setCopyingBiomes(copyBiomes);
         if (mask != null) {
             copy.setSourceMask(mask);
         }
@@ -103,6 +105,7 @@ public class ClipboardCommands {
         help = "Copy the selection to the clipboard\n" +
                 "Flags:\n" +
                 "  -e will also cut entities\n" +
+                "  -b will also copy biomes, source biomes are unaffected\n" +
                 "  -m sets a source mask so that excluded blocks become air\n" +
                 "WARNING: Cutting and pasting entities cannot yet be undone!",
         max = 1
@@ -111,13 +114,14 @@ public class ClipboardCommands {
     @Logging(REGION)
     public void cut(Player player, LocalSession session, EditSession editSession,
                     @Selection Region region, @Optional("air") Pattern leavePattern, @Switch('e') boolean copyEntities,
-                    @Switch('m') Mask mask) throws WorldEditException {
+                    @Switch('b') boolean copyBiomes, @Switch('m') Mask mask) throws WorldEditException {
 
         BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
         clipboard.setOrigin(session.getPlacementPosition(player));
         ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, clipboard, region.getMinimumPoint());
         copy.setSourceFunction(new BlockReplace(editSession, leavePattern));
         copy.setCopyingEntities(copyEntities);
+        copy.setCopyingBiomes(copyBiomes);
         copy.setRemovingEntities(true);
         if (mask != null) {
             copy.setSourceMask(mask);

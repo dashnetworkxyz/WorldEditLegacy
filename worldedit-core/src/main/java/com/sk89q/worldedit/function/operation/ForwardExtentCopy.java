@@ -19,24 +19,28 @@
 
 package com.sk89q.worldedit.function.operation;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.entity.metadata.EntityType;
 import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.function.CombinedRegionFunction;
-import com.sk89q.worldedit.function.RegionFunction;
-import com.sk89q.worldedit.function.RegionMaskingFilter;
+import com.sk89q.worldedit.function.*;
+import com.sk89q.worldedit.function.biome.ExtentBiomeCopy;
 import com.sk89q.worldedit.function.block.ExtentBlockCopy;
 import com.sk89q.worldedit.function.entity.ExtentEntityCopy;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.mask.Masks;
 import com.sk89q.worldedit.function.visitor.EntityVisitor;
+import com.sk89q.worldedit.function.visitor.FlatRegionVisitor;
 import com.sk89q.worldedit.function.visitor.RegionVisitor;
 import com.sk89q.worldedit.math.transform.Identity;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.regions.Regions;
 
+import java.awt.*;
 import java.util.Iterator;
 import java.util.List;
 
@@ -61,11 +65,18 @@ public class ForwardExtentCopy implements Operation {
     private Mask sourceMask = Masks.alwaysTrue();
     private boolean removingEntities;
     private boolean copyingEntities = true; // default to true for backwards compatibility, sort of
+    private boolean copyingBiomes;
     private RegionFunction sourceFunction = null;
     private Transform transform = new Identity();
     private Transform currentTransform = null;
+
     private RegionVisitor lastVisitor;
-    private int affected;
+    private FlatRegionVisitor lastBiomeVisitor;
+    private EntityVisitor lastEntityVisitor;
+
+    private int affectedBlocks;
+    private int affectedBiomeCols;
+    private int affectedEntities;
 
     /**
      * Create a new copy using the region's lowest minimum point as the
@@ -223,19 +234,45 @@ public class ForwardExtentCopy implements Operation {
     }
 
     /**
+     * Return whether biomes should be copied along with blocks.
+     *
+     * @return true if copying biomes
+     */
+    public boolean isCopyingBiomes() {
+        return copyingBiomes;
+    }
+
+    /**
+     * Set whether biomes should be copies along with blocks.
+     *
+     * @param copyingBiomes true if copying
+     */
+    public void setCopyingBiomes(boolean copyingBiomes) {
+        this.copyingBiomes = copyingBiomes;
+    }
+
+    /**
      * Get the number of affected objects.
      *
      * @return the number of affected
      */
     public int getAffected() {
-        return affected;
+        return affectedBlocks + affectedBiomeCols + affectedEntities;
     }
 
     @Override
     public Operation resume(RunContext run) throws WorldEditException {
         if (lastVisitor != null) {
-            affected += lastVisitor.getAffected();
+            affectedBlocks += lastVisitor.getAffected();
             lastVisitor = null;
+        }
+        if (lastBiomeVisitor != null) {
+            affectedBiomeCols += lastBiomeVisitor.getAffected();
+            lastBiomeVisitor = null;
+        }
+        if (lastEntityVisitor != null) {
+            affectedEntities += lastEntityVisitor.getAffected();
+            lastEntityVisitor = null;
         }
 
         if (repetitions > 0) {
@@ -248,30 +285,42 @@ public class ForwardExtentCopy implements Operation {
             }
 
             ExtentBlockCopy blockCopy = new ExtentBlockCopy(source, from, destination, to, currentTransform);
-            RegionMaskingFilter filter = new RegionMaskingFilter(sourceMask, blockCopy);
-            RegionFunction function = sourceFunction != null ? new CombinedRegionFunction(filter, sourceFunction) : filter;
-            RegionVisitor blockVisitor = new RegionVisitor(region, function);
+            RegionMaskingFilter filteredFunction = new RegionMaskingFilter(sourceMask,
+                    sourceFunction == null ? blockCopy : new CombinedRegionFunction(blockCopy, sourceFunction));
+            RegionVisitor blockVisitor = new RegionVisitor(region, filteredFunction);
 
             lastVisitor = blockVisitor;
+
+            if (!copyingBiomes && !copyingEntities) {
+                return new DelegateOperation(this, blockVisitor);
+            }
+
+            List<Operation> ops = Lists.newArrayList(blockVisitor);
+
+            if (copyingBiomes) {
+                ExtentBiomeCopy biomeCopy = new ExtentBiomeCopy(source, from.toVector2D(),
+                        destination, to.toVector2D(), currentTransform);
+                FlatRegionFunction biomeFunction = sourceFunction == null ? biomeCopy
+                        : new FlatRegionMaskingFilter(sourceMask.toMask2D(), biomeCopy);
+                FlatRegionVisitor biomeVisitor = new FlatRegionVisitor(Regions.asFlatRegion(region), biomeFunction);
+                ops.add(biomeVisitor);
+                lastBiomeVisitor = biomeVisitor;
+            }
 
             if (copyingEntities) {
                 ExtentEntityCopy entityCopy = new ExtentEntityCopy(from, destination, to, currentTransform);
                 entityCopy.setRemoving(removingEntities);
-                List<? extends Entity> entities = source.getEntities(region);
-                // Switch to entities.removeIf after Java 8 cutoff.
-                Iterator<? extends Entity> entityIterator = entities.iterator();
-                while (entityIterator.hasNext()) {
-                    EntityType type = entityIterator.next().getFacet(EntityType.class);
-
-                    if (type != null && !type.isPasteable()) {
-                        entityIterator.remove();
-                    }
-                }
+                List<? extends Entity> entities = Lists.newArrayList(source.getEntities(region));
+                entities.removeIf(entity -> {
+                    EntityType type = entity.getFacet(EntityType.class);
+                    return type != null && !type.isPasteable();
+                });
                 EntityVisitor entityVisitor = new EntityVisitor(entities.iterator(), entityCopy);
-                return new DelegateOperation(this, new OperationQueue(blockVisitor, entityVisitor));
-            } else {
-                return new DelegateOperation(this, blockVisitor);
+                ops.add(entityVisitor);
+                lastEntityVisitor = entityVisitor;
             }
+
+            return new DelegateOperation(this, new OperationQueue(ops));
         } else {
             return null;
         }
