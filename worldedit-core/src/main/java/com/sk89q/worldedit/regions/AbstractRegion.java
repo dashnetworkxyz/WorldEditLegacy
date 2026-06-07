@@ -103,13 +103,24 @@ public abstract class AbstractRegion implements Region {
      * Get the number of blocks in the region.
      *
      * @return number of blocks
+     * @deprecated use {@link Region#getVolume()} to prevent overflows
      */
     @Override
     public int getArea() {
+        return (int) getVolume();
+    }
+
+    /**
+     * Get the number of blocks in the region.
+     *
+     * @return number of blocks
+     */
+    @Override
+    public long getVolume() {
         Vector min = getMinimumPoint();
         Vector max = getMaximumPoint();
 
-        return (int)((max.getX() - min.getX() + 1) *
+        return (long) ((max.getX() - min.getX() + 1) *
                      (max.getY() - min.getY() + 1) *
                      (max.getZ() - min.getZ() + 1));
     }

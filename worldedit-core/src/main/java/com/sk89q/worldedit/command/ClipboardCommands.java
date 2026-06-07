@@ -29,6 +29,7 @@ import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.function.block.BlockReplace;
 import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.function.mask.Masks;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
@@ -43,6 +44,8 @@ import com.sk89q.worldedit.regions.selector.ExtendingCuboidRegionSelector;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.command.binding.Switch;
 import com.sk89q.worldedit.util.command.parametric.Optional;
+
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sk89q.minecraft.util.commands.Logging.LogMode.PLACEMENT;
@@ -63,6 +66,20 @@ public class ClipboardCommands {
     public ClipboardCommands(WorldEdit worldEdit) {
         checkNotNull(worldEdit);
         this.worldEdit = worldEdit;
+    }
+
+    /**
+     * Throws if the region would allocate a clipboard larger than the block change limit.
+     *
+     * @param region The region to check
+     * @param session The session
+     * @throws MaxChangedBlocksException if the volume exceeds the limit
+     */
+    private void checkRegionBounds(Region region, LocalSession session) throws MaxChangedBlocksException {
+        int limit = session.getBlockChangeLimit();
+        if (limit >= 0 && region.getBoundingBox().getVolume() >= limit) {
+            throw new MaxChangedBlocksException(limit);
+        }
     }
 
     @Command(
@@ -157,7 +174,10 @@ public class ClipboardCommands {
             "  -v include structure void blocks\n" +
             "  -o pastes at the original position\n" +
             "  -s selects the region after pasting\n" +
-            "  -n no paste, select only. (implies -s)",
+            "  -n no paste, select only. (implies -s)\n" +
+            "  -e paste entities if available\n" +
+            "  -b paste biomes if available\n" +
+            "  -m only paste blocks matching this mask",
         max = 0
     )
     @CommandPermissions("worldedit.clipboard.paste")
@@ -246,7 +266,7 @@ public class ClipboardCommands {
         max = 1
     )
     @CommandPermissions("worldedit.clipboard.flip")
-    public void flip(Player player, LocalSession session, EditSession editSession,
+    public void flip(Player player, LocalSession session,
                      @Optional(Direction.AIM) @Direction Vector direction) throws WorldEditException {
         ClipboardHolder holder = session.getClipboard();
         AffineTransform transform = new AffineTransform();
@@ -261,8 +281,78 @@ public class ClipboardCommands {
         max = 0
     )
     @CommandPermissions("worldedit.clipboard.clear")
-    public void clearClipboard(Player player, LocalSession session, EditSession editSession) throws WorldEditException {
+    public void clearClipboard(Player player, LocalSession session) {
         session.setClipboard(null);
         player.print("Clipboard cleared.");
     }
+
+    @Command(
+            aliases = { "/revolve" },
+            desc = "Revolve the selection around a vertical axis"
+    )
+    @CommandPermissions("worldedit.revolve")
+    public void revolve(Player player, LocalSession session, EditSession editSession,
+                        @Selection Region region,
+                        Integer pasteCount,
+                        @Switch('m') Mask mask,
+                        @Switch('r') boolean reverse,
+                        @Switch('e') boolean copyEntities,
+                        @Switch('b') boolean copyBiomes) throws WorldEditException {
+        checkRegionBounds(region, session);
+
+        if (pasteCount < 2) {
+            player.printError("Paste count must be at least 2.");
+            return;
+        }
+
+        Vector pasteOrigin = session.getPlacementPosition(player);
+
+        // Copy the selection into a clipboard
+        BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
+        clipboard.setOrigin(pasteOrigin);
+        ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, clipboard, region.getMinimumPoint());
+        copy.setCopyingEntities(copyEntities);
+        copy.setCopyingBiomes(copyBiomes);
+
+        if (mask != null) {
+            copy.setSourceMask(mask);
+        }
+        Operations.complete(copy);
+
+        ClipboardHolder holder = new ClipboardHolder(clipboard, editSession.getWorld().getWorldData());
+        // Offset this by half a block to ensure rotations are aligned properly
+        AffineTransform offsetTransform = new AffineTransform().translate(0.5, 0.5, 0.5);
+
+        // Entities can't be offset like blocks, so we need a separate transform. Ideally can be fixed in WE8 by always
+        // offsetting block stuff in ExtentBlockCopy so we don't need the above to be offset.
+        AffineTransform entityTransform = copyEntities ? new AffineTransform() : null;
+
+        // Now paste it multiple times, rotating each time
+        for (int i = 1; i < pasteCount; i++) {
+            double theta = (reverse ? 1 : -1) * (360 * i) / (double) pasteCount;
+            holder.setTransform(offsetTransform.rotateY(theta));
+
+            Operation operation = holder
+                    .createPaste(editSession, editSession.getWorld().getWorldData())
+                    .ignoreAirBlocks(true)
+                    .copyEntities(false)
+                    .copyBiomes(copyBiomes)
+                    .to(pasteOrigin)
+                    .build();
+            Operations.complete(operation);
+
+            if (copyEntities) {
+                // Paste entities separately with correct transform
+                holder.setTransform(entityTransform.rotateY(theta));
+                Operation entityOperation = holder
+                        .createPaste(editSession, editSession.getWorld().getWorldData())
+                        .maskSource(Masks.negate(Masks.alwaysTrue()))
+                        .copyEntities(true)
+                        .to(pasteOrigin)
+                        .build();
+                Operations.complete(entityOperation);
+            }
+        }
+    }
+
 }

@@ -50,6 +50,15 @@ public interface Region extends Iterable<BlockVector>, Cloneable {
     public Vector getMaximumPoint();
 
     /**
+     * Get the bounding box of this region as a {@link CuboidRegion}.
+     *
+     * @return the bounding box
+     */
+    default CuboidRegion getBoundingBox() {
+        return new CuboidRegion(getMinimumPoint(), getMaximumPoint());
+    }
+
+    /**
      * Get the center point of a region.
      * Note: Coordinates will not be integers
      * if the corresponding lengths are even.
@@ -62,8 +71,21 @@ public interface Region extends Iterable<BlockVector>, Cloneable {
      * Get the number of blocks in the region.
      *
      * @return number of blocks
+     * @deprecated use {@link Region#getVolume()} to prevent overflows
      */
+    @Deprecated
     public int getArea();
+
+
+    /**
+     * Get the number of blocks in the region.
+     *
+     * @return number of blocks
+     * @apiNote This must be overridden by new subclasses.
+     */
+    default long getVolume() {
+        return getArea();
+    }
 
     /**
      * Get X-size.
