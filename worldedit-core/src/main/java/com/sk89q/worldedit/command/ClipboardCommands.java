@@ -165,7 +165,7 @@ public class ClipboardCommands {
 
     @Command(
         aliases = { "/paste" },
-        flags = "avosn",
+        flags = "avosnebm",
         desc = "Paste the clipboard's contents",
         help =
             "Pastes the clipboard's contents.\n" +
@@ -353,6 +353,40 @@ public class ClipboardCommands {
                 Operations.complete(entityOperation);
             }
         }
+    }
+
+    @Command(
+            aliases = { "/copyflippaste", "/cfp" },
+            flags = "avosnebm",
+            usage = "[<direction>]",
+            desc = "Copy, flip, then paste. All in one command.",
+            help =
+                    "Copies your selection, flips it, then pastes it.\n" +
+                    "Flags:\n" +
+                    "  -a skips air blocks\n" +
+                    "  -v include structure void blocks\n" +
+                    "  -o pastes at the original position\n" +
+                    "  -s selects the region after pasting\n" +
+                    "  -n no paste, select only. (implies -s)\n" +
+                    "  -e paste entities if available\n" +
+                    "  -b paste biomes if available\n" +
+                    "  -m only paste blocks matching this mask",
+            max = 1
+    )
+    public void revolve(Player player, LocalSession session, EditSession editSession,
+                        @Selection Region region,
+                        @Switch('a') boolean ignoreAirBlocks,
+                        @Switch('v') boolean pasteStructureVoid,
+                        @Switch('o') boolean atOrigin,
+                        @Switch('s') boolean selectPasted,
+                        @Switch('n') boolean onlySelect,
+                        @Switch('e') boolean pasteEntities,
+                        @Switch('b') boolean pasteBiomes,
+                        @Switch('m') Mask sourceMask,
+                        @Optional(Direction.AIM) @Direction Vector direction) throws WorldEditException {
+        copy(player, session, editSession, region, pasteEntities, pasteBiomes, sourceMask);
+        flip(player, session, direction);
+        paste(player, session, editSession, ignoreAirBlocks, pasteStructureVoid, atOrigin, selectPasted, onlySelect, pasteEntities, pasteBiomes, sourceMask);
     }
 
 }
