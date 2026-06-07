@@ -75,7 +75,6 @@ public class ClipboardCommands {
                 "  -b will also copy biomes\n" +
                 "  -m sets a source mask so that excluded blocks become air\n" +
                 "WARNING: Pasting entities cannot yet be undone!",
-        min = 0,
         max = 0
     )
     @CommandPermissions("worldedit.clipboard.copy")
@@ -95,8 +94,12 @@ public class ClipboardCommands {
         session.setClipboard(new ClipboardHolder(clipboard, editSession.getWorld().getWorldData()));
 
         player.print(copy.getAffectedBlocks() + " block(s) were copied.");
-        player.print(copy.getAffectedBiomeCols() + " biomes(s) were copied.");
-        player.print(copy.getAffectedEntities() + " entities(s) were copied.");
+        if (copy.getAffectedBiomeCols() > 0) {
+            player.print(copy.getAffectedBiomeCols() + " biomes(s) were copied.");
+        }
+        if (copy.getAffectedEntities() > 0) {
+            player.print(copy.getAffectedEntities() + " entities(s) were copied.");
+        }
     }
 
     @Command(
@@ -135,8 +138,12 @@ public class ClipboardCommands {
         session.setClipboard(new ClipboardHolder(clipboard, editSession.getWorld().getWorldData()));
 
         player.print(copy.getAffectedBlocks() + " block(s) were cut.");
-        player.print(copy.getAffectedBiomeCols() + " biomes(s) were cut.");
-        player.print(copy.getAffectedEntities() + " entities(s) were cut.");
+        if (copy.getAffectedBiomeCols() > 0) {
+            player.print(copy.getAffectedBiomeCols() + " biomes(s) were cut.");
+        }
+        if (copy.getAffectedEntities() > 0) {
+            player.print(copy.getAffectedEntities() + " entities(s) were cut.");
+        }
     }
 
     @Command(
@@ -152,7 +159,6 @@ public class ClipboardCommands {
             "  -o pastes at the original position\n" +
             "  -s selects the region after pasting\n" +
             "  -n no paste, select only. (implies -s)",
-        min = 0,
         max = 0
     )
     @CommandPermissions("worldedit.clipboard.paste")
@@ -238,7 +244,6 @@ public class ClipboardCommands {
         desc = "Flip the contents of the clipboard",
         help =
             "Flips the contents of the clipboard across the point from which the copy was made.\n",
-        min = 0,
         max = 1
     )
     @CommandPermissions("worldedit.clipboard.flip")
@@ -253,9 +258,7 @@ public class ClipboardCommands {
 
     @Command(
         aliases = { "clearclipboard" },
-        usage = "",
         desc = "Clear your clipboard",
-        min = 0,
         max = 0
     )
     @CommandPermissions("worldedit.clipboard.clear")
