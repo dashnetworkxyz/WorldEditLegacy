@@ -582,7 +582,7 @@ public class WorldEdit {
      * @throws UnknownDirectionException thrown if the direction is not known
      */
     public Vector getDiagonalDirection(Player player, String dirStr) throws UnknownDirectionException {
-        return getPlayerDirection(player, dirStr.toLowerCase()).vector();
+        return getPlayerDirection(player, dirStr.toLowerCase()).vectorTaxi();
     }
 
     /**

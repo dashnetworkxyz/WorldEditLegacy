@@ -29,13 +29,13 @@ import com.sk89q.worldedit.util.Direction;
 public enum PlayerDirection {
 
     NORTH(new Vector(0, 0, -1), new Vector(-1, 0, 0), true),
-    NORTH_EAST((new Vector(1, 0, -1)).normalize(), (new Vector(-1, 0, -1)).normalize(), false),
+    NORTH_EAST(new Vector(1, 0, -1), new Vector(-1, 0, -1), false),
     EAST(new Vector(1, 0, 0), new Vector(0, 0, -1), true),
-    SOUTH_EAST((new Vector(1, 0, 1)).normalize(), (new Vector(1, 0, -1)).normalize(), false),
+    SOUTH_EAST(new Vector(1, 0, 1), new Vector(1, 0, -1), false),
     SOUTH(new Vector(0, 0, 1), new Vector(1, 0, 0), true),
-    SOUTH_WEST((new Vector(-1, 0, 1)).normalize(), (new Vector(1, 0, 1)).normalize(), false),
+    SOUTH_WEST(new Vector(-1, 0, 1), new Vector(1, 0, 1), false),
     WEST(new Vector(-1, 0, 0), new Vector(0, 0, 1), true),
-    NORTH_WEST((new Vector(-1, 0, -1)).normalize(), (new Vector(-1, 0, 1)).normalize(), false),
+    NORTH_WEST(new Vector(-1, 0, -1), new Vector(-1, 0, 1), false),
     UP(new Vector(0, 1, 0), new Vector(0, 0, 1), true),
     DOWN(new Vector(0, -1, 0), new Vector(0, 0, 1), true);
 
@@ -50,6 +50,10 @@ public enum PlayerDirection {
     }
 
     public Vector vector() {
+        return isOrthogonal ? dir : dir.normalize();
+    }
+
+    public Vector vectorTaxi() {
         return dir;
     }
 
