@@ -20,10 +20,11 @@
 package com.sk89q.worldedit.session;
 
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.transform.BlockTransformExtent;
-import com.sk89q.worldedit.function.mask.ExistingBlockMask;
+import com.sk89q.worldedit.function.mask.*;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.math.transform.Transform;
@@ -40,8 +41,9 @@ public class PasteBuilder {
     private final Clipboard clipboard;
     private final Transform transform;
     private final Extent targetExtent;
-
     private final WorldData targetWorldData;
+
+    private Mask sourceMask = Masks.alwaysTrue();
 
     private Vector to = Vector.ZERO;
     private boolean ignoreAirBlocks;
@@ -80,6 +82,19 @@ public class PasteBuilder {
     }
 
     /**
+     * Set a custom mask of blocks to ignore from the source.
+     * This provides a more flexible alternative to {@link #ignoreAirBlocks(boolean)}, for example
+     * one might want to ignore structure void if copying a Minecraft Structure, etc.
+     *
+     * @param sourceMask the mask for the source
+     * @return this builder instance
+     */
+    public PasteBuilder maskSource(Mask sourceMask) {
+        this.sourceMask = sourceMask == null ? Masks.alwaysTrue() : sourceMask;
+        return this;
+    }
+
+    /**
      * Set whether air blocks in the source are skipped over when pasting.
      *
      * @return this builder instance
@@ -90,17 +105,74 @@ public class PasteBuilder {
     }
 
     /**
+     * Set whether structure void blocks in the source are skipped over when pasting.
+     *
+     * @param ignoreStructureVoidBlocks value to set it to
+     * @return This builder instance
+     */
+    public PasteBuilder ignoreStructureVoidBlocks(boolean ignoreStructureVoidBlocks) {
+        this.ignoreStructureVoidBlocks = ignoreStructureVoidBlocks;
+        return this;
+    }
+
+    /**
+     * Set whether the copy should include source entities.
+     * Note that this is true by default for legacy reasons.
+     *
+     * @param copyEntities if entities should be copied
+     * @return this builder instance
+     */
+    public PasteBuilder copyEntities(boolean copyEntities) {
+        this.copyEntities = copyEntities;
+        return this;
+    }
+
+    /**
+     * Set whether the copy should include source biomes (if available).
+     *
+     * @param copyBiomes if biomes should be copied
+     * @return this builder instance
+     */
+    public PasteBuilder copyBiomes(boolean copyBiomes) {
+        this.copyBiomes = copyBiomes;
+        return this;
+    }
+
+    /**
+     * Set the region to copy from the clipboard. By default, this uses the region stored in the clipboard.
+     *
+     * @param copyRegion the region to copy from the clipboard
+     * @return this builder instance
+     */
+    public PasteBuilder copyRegion(Region copyRegion) {
+        this.copyRegion = copyRegion;
+        return this;
+    }
+
+    /**
      * Build the operation.
      *
      * @return the operation
      */
     public Operation build() {
         BlockTransformExtent extent = new BlockTransformExtent(clipboard, transform, targetWorldData.getBlockRegistry());
-        ForwardExtentCopy copy = new ForwardExtentCopy(extent, clipboard.getRegion(), clipboard.getOrigin(), targetExtent, to);
+        ForwardExtentCopy copy = new ForwardExtentCopy(extent, copyRegion, clipboard.getOrigin(), targetExtent, to);
         copy.setTransform(transform);
+
+        Mask combinedMask = sourceMask;
         if (ignoreAirBlocks) {
-            copy.setSourceMask(new ExistingBlockMask(clipboard));
+            combinedMask = combinedMask == Masks.alwaysTrue() ? new ExistingBlockMask(clipboard)
+                    : new MaskIntersection(combinedMask, new ExistingBlockMask(clipboard));
         }
+        if (ignoreStructureVoidBlocks) {
+            Mask structureVoidMask = Masks.negate(new BlockMask(clipboard, new BaseBlock(217)));
+            combinedMask = combinedMask == Masks.alwaysTrue() ? structureVoidMask
+                    : new MaskIntersection(combinedMask, structureVoidMask);
+        }
+
+        copy.setSourceMask(combinedMask);
+        copy.setCopyingEntities(copyEntities);
+        copy.setCopyingBiomes(copyBiomes && clipboard.hasBiomes());
         return copy;
     }
 

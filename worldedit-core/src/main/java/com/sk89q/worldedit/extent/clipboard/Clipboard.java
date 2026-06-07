@@ -58,4 +58,11 @@ public interface Clipboard extends Extent {
      */
     void setOrigin(Vector origin);
 
+    /**
+     * @return true if the clipboard has biome data set
+     */
+    default boolean hasBiomes() {
+        return false;
+    }
+
 }

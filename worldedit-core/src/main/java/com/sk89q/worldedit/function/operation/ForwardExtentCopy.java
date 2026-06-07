@@ -260,6 +260,33 @@ public class ForwardExtentCopy implements Operation {
         return affectedBlocks + affectedBiomeCols + affectedEntities;
     }
 
+    /**
+     * Get the number of affected blocks
+     *
+     * @return the number of affected blocks
+     */
+    public int getAffectedBlocks() {
+        return affectedBlocks;
+    }
+
+    /**
+     * Get the number of affected biomes.
+     *
+     * @return the number of affected biomes
+     */
+    public int getAffectedBiomeCols() {
+        return affectedBiomeCols;
+    }
+
+    /**
+     * Get the number of affected entities.
+     *
+     * @return the number of affected entities
+     */
+    public int getAffectedEntities() {
+        return affectedEntities;
+    }
+
     @Override
     public Operation resume(RunContext run) throws WorldEditException {
         if (lastVisitor != null) {

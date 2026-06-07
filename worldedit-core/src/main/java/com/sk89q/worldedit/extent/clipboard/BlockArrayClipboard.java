@@ -45,8 +45,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class BlockArrayClipboard implements Clipboard {
 
     private final Region region;
-    private Vector origin = new Vector();
-    private final BaseBlock[][][] blocks;
+    private Vector origin;
+    /**
+     * Stride for y-index, for faster access to blocks/biomes array.
+     */
+    private final int yStride;
+    /**
+     * Stride for z-index, for faster access to blocks/biomes array.
+     */
+    private final int zStride;
+    private final BaseBlock[] blocks; // Laid out in x-y-z order
+    private BaseBiome[] biomes = null; // Laid out in x-y-z order
     private final List<ClipboardEntity> entities = new ArrayList<ClipboardEntity>();
 
     /**
@@ -62,7 +71,13 @@ public class BlockArrayClipboard implements Clipboard {
         this.origin = region.getMinimumPoint();
 
         Vector dimensions = getDimensions();
-        blocks = new BaseBlock[dimensions.getBlockX()][dimensions.getBlockY()][dimensions.getBlockZ()];
+        blocks = new BaseBlock[dimensions.getBlockX() * dimensions.getBlockY() * dimensions.getBlockZ()];
+        yStride = dimensions.getBlockX();
+        zStride = yStride * dimensions.getBlockY();
+    }
+
+    private int indexBlockVecBasedArray(Vector v) {
+        return v.getBlockX() + (v.getBlockY() * yStride) + (v.getBlockZ() * zStride);
     }
 
     @Override
@@ -123,7 +138,7 @@ public class BlockArrayClipboard implements Clipboard {
     public BaseBlock getBlock(Vector position) {
         if (region.contains(position)) {
             Vector v = position.subtract(region.getMinimumPoint());
-            BaseBlock block = blocks[v.getBlockX()][v.getBlockY()][v.getBlockZ()];
+            BaseBlock block = blocks[indexBlockVecBasedArray(v)];
             if (block != null) {
                 return new BaseBlock(block);
             }
@@ -141,7 +156,7 @@ public class BlockArrayClipboard implements Clipboard {
     public boolean setBlock(Vector position, BaseBlock block) throws WorldEditException {
         if (region.contains(position)) {
             Vector v = position.subtract(region.getMinimumPoint());
-            blocks[v.getBlockX()][v.getBlockY()][v.getBlockZ()] = new BaseBlock(block);
+            blocks[indexBlockVecBasedArray(v)] = new BaseBlock(block);
             return true;
         } else {
             return false;
@@ -149,12 +164,35 @@ public class BlockArrayClipboard implements Clipboard {
     }
 
     @Override
+    public boolean hasBiomes() {
+        return biomes != null;
+    }
+
+    @Override
     public BaseBiome getBiome(Vector2D position) {
+        if (biomes != null
+                && position.containedWithin(getMinimumPoint().toVector2D(), getMaximumPoint().toVector2D())) {
+            Vector v = position.subtract(region.getMinimumPoint().toVector2D()).toVector();
+            BaseBiome biomeType = biomes[indexBlockVecBasedArray(v)];
+            if (biomeType != null) {
+                return biomeType;
+            }
+        }
+
         return new BaseBiome(0);
     }
 
     @Override
     public boolean setBiome(Vector2D position, BaseBiome biome) {
+        if (position.containedWithin(getMinimumPoint().toVector2D(), getMaximumPoint().toVector2D())) {
+            Vector v = position.subtract(region.getMinimumPoint().toVector2D()).toVector();
+            if (biomes == null) {
+                Vector dimensions = getDimensions();
+                biomes = new BaseBiome[dimensions.getBlockX() * dimensions.getBlockY() * dimensions.getBlockZ()];
+            }
+            biomes[indexBlockVecBasedArray(v)] = biome;
+            return true;
+        }
         return false;
     }
 

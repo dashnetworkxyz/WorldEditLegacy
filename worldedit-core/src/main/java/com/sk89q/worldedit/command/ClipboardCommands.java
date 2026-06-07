@@ -94,7 +94,9 @@ public class ClipboardCommands {
         Operations.completeLegacy(copy);
         session.setClipboard(new ClipboardHolder(clipboard, editSession.getWorld().getWorldData()));
 
-        player.print(region.getArea() + " block(s) were copied.");
+        player.print(copy.getAffectedBlocks() + " block(s) were copied.");
+        player.print(copy.getAffectedBiomeCols() + " biomes(s) were copied.");
+        player.print(copy.getAffectedEntities() + " entities(s) were copied.");
     }
 
     @Command(
@@ -107,14 +109,17 @@ public class ClipboardCommands {
                 "  -e will also cut entities\n" +
                 "  -b will also copy biomes, source biomes are unaffected\n" +
                 "  -m sets a source mask so that excluded blocks become air\n" +
-                "WARNING: Cutting and pasting entities cannot yet be undone!",
+                "WARNING: Cutting / pasting entities & biomes cannot yet be undone!",
         max = 1
     )
     @CommandPermissions("worldedit.clipboard.cut")
     @Logging(REGION)
     public void cut(Player player, LocalSession session, EditSession editSession,
-                    @Selection Region region, @Optional("air") Pattern leavePattern, @Switch('e') boolean copyEntities,
-                    @Switch('b') boolean copyBiomes, @Switch('m') Mask mask) throws WorldEditException {
+                    @Selection Region region,
+                    @Optional("air") Pattern leavePattern,
+                    @Switch('e') boolean copyEntities,
+                    @Switch('b') boolean copyBiomes,
+                    @Switch('m') Mask mask) throws WorldEditException {
 
         BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
         clipboard.setOrigin(session.getPlacementPosition(player));
@@ -129,7 +134,9 @@ public class ClipboardCommands {
         Operations.completeLegacy(copy);
         session.setClipboard(new ClipboardHolder(clipboard, editSession.getWorld().getWorldData()));
 
-        player.print(region.getArea() + " block(s) were copied.");
+        player.print(copy.getAffectedBlocks() + " block(s) were cut.");
+        player.print(copy.getAffectedBiomeCols() + " biomes(s) were cut.");
+        player.print(copy.getAffectedEntities() + " entities(s) were cut.");
     }
 
     @Command(
@@ -141,47 +148,63 @@ public class ClipboardCommands {
             "Pastes the clipboard's contents.\n" +
             "Flags:\n" +
             "  -a skips air blocks\n" +
+            "  -v include structure void blocks\n" +
             "  -o pastes at the original position\n" +
-            "  -s selects the region after pasting",
+            "  -s selects the region after pasting\n" +
+            "  -n no paste, select only. (implies -s)",
         min = 0,
         max = 0
     )
     @CommandPermissions("worldedit.clipboard.paste")
     @Logging(PLACEMENT)
     public void paste(Player player, LocalSession session, EditSession editSession,
-                      @Switch('a') boolean ignoreAirBlocks, @Switch('o') boolean atOrigin,
-                      @Switch('s') boolean selectPasted) throws WorldEditException {
+                      @Switch('a') boolean ignoreAirBlocks,
+                      @Switch('v') boolean pasteStructureVoid,
+                      @Switch('o') boolean atOrigin,
+                      @Switch('s') boolean selectPasted,
+                      @Switch('n') boolean onlySelect,
+                      @Switch('e') boolean pasteEntities,
+                      @Switch('b') boolean pasteBiomes,
+                      @Switch('m') Mask sourceMask) throws WorldEditException {
 
         ClipboardHolder holder = session.getClipboard();
         Clipboard clipboard = holder.getClipboard();
         Region region = clipboard.getRegion();
 
         Vector to = atOrigin ? clipboard.getOrigin() : session.getPlacementPosition(player);
-        Operation operation = holder
-                .createPaste(editSession, editSession.getWorld().getWorldData())
-                .to(to)
-                .ignoreAirBlocks(ignoreAirBlocks)
-                .build();
-        Operations.completeLegacy(operation);
+        if (!onlySelect) {
+            Operation operation = holder
+                    .createPaste(editSession, editSession.getWorld().getWorldData())
+                    .to(to)
+                    .ignoreAirBlocks(ignoreAirBlocks)
+                    .ignoreStructureVoidBlocks(!pasteStructureVoid)
+                    .copyBiomes(pasteBiomes)
+                    .copyEntities(pasteEntities)
+                    .maskSource(sourceMask)
+                    .build();
+            Operations.completeLegacy(operation);
+        }
 
-        if (selectPasted) {
+        if (selectPasted || onlySelect) {
             Vector clipboardOffset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
             Vector realTo = to.add(holder.getTransform().apply(clipboardOffset));
             Vector max = realTo.add(holder.getTransform().apply(region.getMaximumPoint().subtract(region.getMinimumPoint())));
             RegionSelector selector;
-
             if (session.getRegionSelector(player.getWorld()) instanceof ExtendingCuboidRegionSelector) {
                 selector = new ExtendingCuboidRegionSelector(player.getWorld(), realTo, max);
             } else {
                 selector = new CuboidRegionSelector(player.getWorld(), realTo, max);
             }
-
             session.setRegionSelector(player.getWorld(), selector);
             selector.learnChanges();
             selector.explainRegionAdjust(player, session);
         }
 
-        player.print("The clipboard has been pasted at " + to);
+        if (onlySelect) {
+            player.print("Selected clipboard paste region.");
+        } else {
+            player.print("The clipboard has been pasted at " + to + ".");
+        }
     }
 
     @Command(
@@ -197,7 +220,7 @@ public class ClipboardCommands {
         if ((yRotate != null && Math.abs(yRotate % 90) > 0.001) ||
                 xRotate != null && Math.abs(xRotate % 90) > 0.001 ||
                 zRotate != null && Math.abs(zRotate % 90) > 0.001) {
-            player.printDebug("Note: Interpolation is not yet supported, so angles that are multiples of 90 is recommended.");
+            player.printDebug("Note: Interpolation is not supported, so angles that are multiples of 90 is recommended.");
         }
 
         ClipboardHolder holder = session.getClipboard();
@@ -222,37 +245,10 @@ public class ClipboardCommands {
     public void flip(Player player, LocalSession session, EditSession editSession,
                      @Optional(Direction.AIM) @Direction Vector direction) throws WorldEditException {
         ClipboardHolder holder = session.getClipboard();
-        Clipboard clipboard = holder.getClipboard();
         AffineTransform transform = new AffineTransform();
         transform = transform.scale(direction.positive().multiply(-2).add(1, 1, 1));
         holder.setTransform(holder.getTransform().combine(transform));
         player.print("The clipboard copy has been flipped.");
-    }
-
-    @Command(
-        aliases = { "/load" },
-        usage = "<filename>",
-        desc = "Load a schematic into your clipboard",
-        min = 0,
-        max = 1
-    )
-    @Deprecated
-    @CommandPermissions("worldedit.clipboard.load")
-    public void load(Actor actor) {
-        actor.printError("This command is no longer used. See //schematic load.");
-    }
-
-    @Command(
-        aliases = { "/save" },
-        usage = "<filename>",
-        desc = "Save a schematic into your clipboard",
-        min = 0,
-        max = 1
-    )
-    @Deprecated
-    @CommandPermissions("worldedit.clipboard.save")
-    public void save(Actor actor) {
-        actor.printError("This command is no longer used. See //schematic save.");
     }
 
     @Command(
