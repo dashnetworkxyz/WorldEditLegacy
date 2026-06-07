@@ -261,7 +261,7 @@ public class WorldEditBinding extends BindingHelper {
     public Vector getDirection(ArgumentStack context, Direction direction) 
             throws ParameterException, UnknownDirectionException {
         Player sender = getPlayer(context);
-        return worldEdit.getDiagonalDirection(sender, context.next());
+        return worldEdit.getDiagonalDirectionTaxi(sender, context.next());
     }
 
     /**
