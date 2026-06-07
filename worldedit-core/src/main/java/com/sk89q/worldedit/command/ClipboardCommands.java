@@ -67,7 +67,7 @@ public class ClipboardCommands {
 
     @Command(
         aliases = { "/copy" },
-        flags = "em",
+        flags = "ebm",
         desc = "Copy the selection to the clipboard",
         help = "Copy the selection to the clipboard\n" +
                 "Flags:\n" +
@@ -104,7 +104,7 @@ public class ClipboardCommands {
 
     @Command(
         aliases = { "/cut" },
-        flags = "em",
+        flags = "ebm",
         usage = "[leave-id]",
         desc = "Cut the selection to the clipboard",
         help = "Copy the selection to the clipboard\n" +
@@ -148,8 +148,7 @@ public class ClipboardCommands {
 
     @Command(
         aliases = { "/paste" },
-        usage = "",
-        flags = "sao",
+        flags = "avosn",
         desc = "Paste the clipboard's contents",
         help =
             "Pastes the clipboard's contents.\n" +
