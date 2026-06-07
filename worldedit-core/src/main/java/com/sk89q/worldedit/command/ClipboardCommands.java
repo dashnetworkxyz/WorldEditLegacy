@@ -373,7 +373,8 @@ public class ClipboardCommands {
                     "  -m only paste blocks matching this mask",
             max = 1
     )
-    public void revolve(Player player, LocalSession session, EditSession editSession,
+    @CommandPermissions("worldedit.copyflippaste")
+    public void copyflippaste(Player player, LocalSession session, EditSession editSession,
                         @Selection Region region,
                         @Switch('a') boolean ignoreAirBlocks,
                         @Switch('v') boolean pasteStructureVoid,
