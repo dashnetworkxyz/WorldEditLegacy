@@ -19,7 +19,6 @@
 
 package com.sk89q.worldedit.command;
 
-import com.google.common.base.Optional;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandException;
@@ -36,6 +35,8 @@ import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.permission.ActorSelectorLimits;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.internal.annotation.Direction;
+import com.sk89q.worldedit.internal.annotation.Selection;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionOperationException;
 import com.sk89q.worldedit.regions.RegionSelector;
@@ -49,6 +50,8 @@ import com.sk89q.worldedit.regions.selector.RegionSelectorType;
 import com.sk89q.worldedit.regions.selector.SphereRegionSelector;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.Countable;
+import com.sk89q.worldedit.util.command.binding.Range;
+import com.sk89q.worldedit.util.command.parametric.Optional;
 import com.sk89q.worldedit.util.formatting.ColorCodeBuilder;
 import com.sk89q.worldedit.util.formatting.Style;
 import com.sk89q.worldedit.util.formatting.StyledFragment;
@@ -395,66 +398,24 @@ public class SelectionCommands {
 
     @Command(
         aliases = { "/contract" },
-        usage = "<amount> [reverse-amount] [direction]",
+        usage = "[amount] [reverse-amount] [direction]",
         desc = "Contract the selection area",
-        min = 1,
         max = 3
     )
     @Logging(REGION)
     @CommandPermissions("worldedit.selection.contract")
-    public void contract(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException {
-
-        List<Vector> dirs = new ArrayList<Vector>();
-        int change = args.getInteger(0);
-        int reverseChange = 0;
-
-        switch (args.argsLength()) {
-        case 2:
-            // Either a reverse amount or a direction
-            try {
-                reverseChange = args.getInteger(1);
-                dirs.add(we.getDirection(player, "me"));
-            } catch (NumberFormatException e) {
-                if (args.getString(1).contains(",")) {
-                    String[] split = args.getString(1).split(",");
-                    for (String s : split) {
-                        dirs.add(we.getDirection(player, s.toLowerCase()));
-                    }
-                } else {
-                    dirs.add(we.getDirection(player, args.getString(1).toLowerCase()));
-                }
-            }
-            break;
-
-        case 3:
-            // Both reverse amount and direction
-            reverseChange = args.getInteger(1);
-            if (args.getString(2).contains(",")) {
-                String[] split = args.getString(2).split(",");
-                for (String s : split) {
-                    dirs.add(we.getDirection(player, s.toLowerCase()));
-                }
-            } else {
-                dirs.add(we.getDirection(player, args.getString(2).toLowerCase()));
-            }
-            break;
-
-        default:
-            dirs.add(we.getDirection(player, "me"));
-            break;
-        }
+    public void contract(Player player, LocalSession session,
+                         @Selection Region region,
+                         @Optional("1") @Range(min = 1) int amount,
+                         @Optional("0") int reverseChange,
+                         @Optional(Direction.AIM) @Direction Vector direction) throws WorldEditException {
 
         try {
-            Region region = session.getSelection(player.getWorld());
             int oldSize = region.getArea();
             if (reverseChange == 0) {
-                for (Vector dir : dirs) {
-                    region.contract(dir.multiply(change));
-                }
+                region.contract(direction.multiply(amount));
             } else {
-                for (Vector dir : dirs) {
-                    region.contract(dir.multiply(change), dir.multiply(-reverseChange));
-                }
+                region.contract(direction.multiply(amount), direction.multiply(-reverseChange));
             }
             session.getRegionSelector(player.getWorld()).learnChanges();
             int newSize = region.getArea();
@@ -470,38 +431,20 @@ public class SelectionCommands {
 
     @Command(
         aliases = { "/shift" },
-        usage = "<amount> [direction]",
+        usage = "[amount] [direction]",
         desc = "Shift the selection area",
-        min = 1,
         max = 2
     )
     @Logging(REGION)
     @CommandPermissions("worldedit.selection.shift")
-    public void shift(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException {
-
-        List<Vector> dirs = new ArrayList<Vector>();
-        int change = args.getInteger(0);
-        if (args.argsLength() == 2) {
-            if (args.getString(1).contains(",")) {
-                for (String s : args.getString(1).split(",")) {
-                    dirs.add(we.getDirection(player, s.toLowerCase()));
-                }
-            } else {
-                dirs.add(we.getDirection(player, args.getString(1).toLowerCase()));
-            }
-        } else {
-            dirs.add(we.getDirection(player, "me"));
-        }
+    public void shift(Player player, LocalSession session,
+                      @Selection Region region,
+                      @Optional("1") @Range(min = 1) int amount,
+                      @Optional(Direction.AIM) @Direction Vector direction) throws WorldEditException {
 
         try {
-            Region region = session.getSelection(player.getWorld());
-
-            for (Vector dir : dirs) {
-                region.shift(dir.multiply(change));
-            }
-
+            region.shift(direction.multiply(amount));
             session.getRegionSelector(player.getWorld()).learnChanges();
-
             session.getRegionSelector(player.getWorld()).explainRegionAdjust(player, session);
 
             player.print("Region shifted.");
@@ -737,7 +680,7 @@ public class SelectionCommands {
         } else if (typeName.equalsIgnoreCase("poly")) {
             selector = new Polygonal2DRegionSelector(oldSelector);
             player.print("2D polygon selector: Left/right click to add a point.");
-            Optional<Integer> limit = ActorSelectorLimits.forActor(player).getPolygonVertexLimit();
+            com.google.common.base.Optional<Integer> limit = ActorSelectorLimits.forActor(player).getPolygonVertexLimit();
             if (limit.isPresent()) {
                 player.print(limit.get() + " points maximum.");
             }
@@ -753,7 +696,7 @@ public class SelectionCommands {
         } else if (typeName.equalsIgnoreCase("convex") || typeName.equalsIgnoreCase("hull") || typeName.equalsIgnoreCase("polyhedron")) {
             selector = new ConvexPolyhedralRegionSelector(oldSelector);
             player.print("Convex polyhedral selector: Left click=First vertex, right click to add more.");
-            Optional<Integer> limit = ActorSelectorLimits.forActor(player).getPolyhedronVertexLimit();
+            com.google.common.base.Optional<Integer> limit = ActorSelectorLimits.forActor(player).getPolyhedronVertexLimit();
             if (limit.isPresent()) {
                 player.print(limit.get() + " points maximum.");
             }
