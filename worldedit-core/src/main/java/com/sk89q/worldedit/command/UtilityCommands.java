@@ -521,13 +521,7 @@ public class UtilityCommands {
             try {
                 Expression expression = Expression.compile(input);
                 return expression.evaluate();
-            } catch (EvaluationException e) {
-                actor.printError(String.format(
-                        "'%s' could not be parsed as a valid expression", input));
-                throw new CompletionException(e);
             } catch (ExpressionException e) {
-                actor.printError(String.format(
-                        "'%s' could not be evaluated (error: %s)", input, e.getMessage()));
                 throw new CompletionException(e);
             }
         });
@@ -538,6 +532,14 @@ public class UtilityCommands {
         } catch (TimeoutException e) {
             future.cancel(true);
             actor.printError("Calculations exceeded time limit");
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof EvaluationException) {
+                actor.printError(String.format(
+                        "'%s' could not be parsed as a valid expression", input));
+            } else if (e.getCause() instanceof ExpressionException) {
+                actor.printError(String.format(
+                        "'%s' could not be evaluated (error: %s)", input, e.getCause().getMessage()));
+            }
         } catch (InterruptedException | ExecutionException ignored) {}
     }
 
