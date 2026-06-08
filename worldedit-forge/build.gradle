@@ -100,7 +100,6 @@ tasks.withType(Jar).configureEach {
 remapJar {
     archiveBaseName.set("worldedit-forge-$minecraftVersion")
     archiveClassifier.set('dist')
-    //noinspection GroovyAssignabilityCheck
     inputFile.set(tasks.shadowJar.archiveFile)
 }
 
@@ -110,7 +109,6 @@ jar {
 
 shadowJar {
     dependencies {
-        //noinspection DependencyNotationArgument
         include(dependency(':worldedit-core'))
     }
 
