@@ -67,7 +67,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * The Sponge implementation of WorldEdit.
  */
-@Plugin(id = SpongeWorldEdit.MOD_ID)
+@Plugin(id = SpongeWorldEdit.MOD_ID, name = "WorldEdit",
+        description = "WorldEdit is an easy-to-use in-game world editor for Minecraft")
 public class SpongeWorldEdit {
 
     @Inject
@@ -118,7 +119,7 @@ public class SpongeWorldEdit {
 
     @Listener
     public void postInit(GamePostInitializationEvent event) {
-        logger.info("WorldEdit for Sponge (version " + getInternalVersion() + ") is loaded");
+        logger.info("WorldEdit for Sponge (version {}) is loaded", getInternalVersion());
     }
 
     @Listener
@@ -161,11 +162,11 @@ public class SpongeWorldEdit {
         try {
             adapterLoader.addFromJar(container.getSource().get().toFile());
         } catch (IOException e) {
-            logger.warn("Failed to search " + container.getSource().get().toFile() + " for Sponge adapters", e);
+            logger.warn("Failed to search {} for Sponge adapters", container.getSource().get().toFile(), e);
         }
         try {
             spongeAdapter = adapterLoader.loadAdapter();
-            logger.info("Using " + spongeAdapter.getClass().getCanonicalName() + " as the Sponge adapter");
+            logger.info("Using {} as the Sponge adapter", spongeAdapter.getClass().getCanonicalName());
         } catch (AdapterLoadException e) {
             Platform platform = worldEdit.getPlatformManager().queryCapability(Capability.WORLD_EDITING);
             if (platform instanceof SpongePlatform) {

@@ -1,5 +1,4 @@
 import org.spongepowered.gradle.plugin.config.PluginLoaders
-import org.spongepowered.plugin.metadata.model.PluginDependency
 
 buildscript {
     repositories {
@@ -17,8 +16,8 @@ apply plugin: 'org.spongepowered.gradle.plugin'
 
 dependencies {
     implementation project(':worldedit-core')
-    implementation 'org.spongepowered:spongeapi:7.0.0-SNAPSHOT'
-    testImplementation "org.mockito:mockito-core:1.9.0-rc1"
+    implementation 'org.spongepowered:spongeapi:7.4.0-SNAPSHOT'
+    testImplementation 'org.mockito:mockito-core:1.9.0-rc1'
 }
 
 sponge {
@@ -30,21 +29,16 @@ sponge {
     }
     plugin('worldedit') {
         entrypoint('com.sk89q.worldedit.sponge.SpongeWorldEdit')
-        displayName('WorldEdit')
-        version(version)
-        description("WorldEdit is an easy-to-use in-game world editor for Minecraft")
-        dependency("spongeapi") {
-            loadOrder(PluginDependency.LoadOrder.AFTER)
-            optional(false)
-        }
+        description('')
+        version('')
     }
 }
 
 jar {
     manifest {
         attributes(
-                "Class-Path": "truezip.jar WorldEdit/truezip.jar js.jar WorldEdit/js.jar",
-                "WorldEdit-Version": version
+                'Class-Path': 'truezip.jar WorldEdit/truezip.jar js.jar WorldEdit/js.jar',
+                'WorldEdit-Version': version
         )
     }
 
