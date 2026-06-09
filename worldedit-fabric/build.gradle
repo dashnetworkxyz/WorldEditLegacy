@@ -6,15 +6,15 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.fabricmc.fabric-loom-remap:net.fabricmc.fabric-loom-remap.gradle.plugin:1.16.1'
-        classpath 'ploceus:ploceus.gradle.plugin:1.16.1'
+        classpath "net.fabricmc.fabric-loom-remap:net.fabricmc.fabric-loom-remap.gradle.plugin:$loomVersion"
+        classpath "ploceus:ploceus.gradle.plugin:$loomVersion"
     }
 }
 
 apply plugin: 'net.fabricmc.fabric-loom-remap'
 apply plugin: 'ploceus'
 
-String minecraftVersion = '1.8.9'
+String minecraftVersion = '1.8.9' // TODO: Multi-version
 
 ploceus {
     setIntermediaryGeneration(2)
@@ -22,8 +22,8 @@ ploceus {
 
 dependencies {
     minecraft "com.mojang:minecraft:$minecraftVersion"
-    modImplementation 'net.fabricmc:fabric-loader:0.19.2'
-    mappings ploceus.featherMappings('1')
+    modImplementation "net.fabricmc:fabric-loader:$loaderVersion"
+    mappings ploceus.featherMappings(featherVersion)
 }
 
 processResources {
