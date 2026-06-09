@@ -21,6 +21,8 @@ ploceus {
 }
 
 dependencies {
+    implementation project(':worldedit-core')
+
     minecraft "com.mojang:minecraft:$minecraftVersion"
     modImplementation "net.fabricmc:fabric-loader:$loaderVersion"
     mappings ploceus.featherMappings(featherVersion)
@@ -29,5 +31,11 @@ dependencies {
 processResources {
     filesMatching('fabric.mod.json') {
         expand 'internalVersion': version
+    }
+}
+
+shadowJar {
+    dependencies {
+        include project(':worldedit-core')
     }
 }
