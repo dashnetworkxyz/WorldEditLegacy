@@ -2,6 +2,6 @@ rootProject.name = 'worldedit'
 
 include 'worldedit-core'
 include 'worldedit-bukkit'
+include 'worldedit-fabric'
 include 'worldedit-forge'
 include 'worldedit-sponge'
-//include 'worldedit-fabric'

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "worldedit",
+  "version": "${internalVersion}",
+  "name": "WorldEdit",
+  "contact": {
+    "sources": "https://github.com/dashnetworkxyz/WorldEditLegacy"
+  },
+  "license": "GPL-3.0",
+  "entrypoints": {
+    "main": [
+      "com.sk89q.worldedit.fabric.FabricWorldEdit"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.17.3",
+    "minecraft": ">=1.8.9"
+  }
+}

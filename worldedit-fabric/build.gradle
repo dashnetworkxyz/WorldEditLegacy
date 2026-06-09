@@ -1,0 +1,33 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.fabricmc.net' }
+        maven { url = 'https://maven.ornithemc.net/releases' }
+    }
+
+    dependencies {
+        classpath 'net.fabricmc.fabric-loom-remap:net.fabricmc.fabric-loom-remap.gradle.plugin:1.16.1'
+        classpath 'ploceus:ploceus.gradle.plugin:1.16.1'
+    }
+}
+
+apply plugin: 'net.fabricmc.fabric-loom-remap'
+apply plugin: 'ploceus'
+
+String minecraftVersion = '1.8.9'
+
+ploceus {
+    setIntermediaryGeneration(2)
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:$minecraftVersion"
+    modImplementation 'net.fabricmc:fabric-loader:0.19.2'
+    mappings ploceus.featherMappings('1')
+}
+
+processResources {
+    filesMatching('fabric.mod.json') {
+        expand 'internalVersion': version
+    }
+}
