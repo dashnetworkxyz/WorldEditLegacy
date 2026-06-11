@@ -238,9 +238,9 @@ public class ForgeWorld extends AbstractWorld {
 
             for (int i = 0; i < size; i++) {
                 //#if MC>11002
-                //$$inv.setInventorySlotContents(i, ItemStack.EMPTY);
+                inv.setInventorySlotContents(i, ItemStack.EMPTY);
                 //#else
-                inv.setInventorySlotContents(i, null);
+                //$$inv.setInventorySlotContents(i, null);
                 //#endif
             }
 

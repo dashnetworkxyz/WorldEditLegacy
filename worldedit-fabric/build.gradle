@@ -16,10 +16,6 @@ apply plugin: 'ploceus'
 
 String minecraftVersion = '1.8.9' // TODO: Multi-version
 
-ploceus {
-    setIntermediaryGeneration(2)
-}
-
 dependencies {
     implementation project(':worldedit-core')
 
