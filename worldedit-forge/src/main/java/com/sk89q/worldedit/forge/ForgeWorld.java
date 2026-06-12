@@ -233,17 +233,7 @@ public class ForgeWorld extends AbstractWorld {
         TileEntity tile = getWorld().getTileEntity(new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ()));
 
         if ((tile instanceof IInventory)) {
-            IInventory inv = (IInventory) tile;
-            int size = inv.getSizeInventory();
-
-            for (int i = 0; i < size; i++) {
-                //#if MC>11002
-                inv.setInventorySlotContents(i, ItemStack.EMPTY);
-                //#else
-                //$$inv.setInventorySlotContents(i, null);
-                //#endif
-            }
-
+            ((IInventory) tile).clear();
             return true;
         }
 

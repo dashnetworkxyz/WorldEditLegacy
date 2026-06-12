@@ -24,7 +24,11 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.world.AbstractWorld;
 import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.InventoryBlockEntity;
 import net.minecraft.block.state.BlockState;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
@@ -107,8 +111,8 @@ public class FabricWorld extends AbstractWorld {
             if (block.hasNbtData()) {
                 // Kill the old TileEntity
                 world.removeBlockEntity(pos);
-                NBTTagCompound nativeTag = NBTConverter.toNative(block.getNbtData());
-                nativeTag.setString("id", block.getNbtId());
+                NbtCompound nativeTag = NbtConverter.toNative(block.getNbtData());
+                nativeTag.putString("id", block.getNbtId());
                 TileEntityUtils.setTileEntity(world, position, nativeTag);
             }
         }
@@ -117,11 +121,42 @@ public class FabricWorld extends AbstractWorld {
             if (!successful) {
                 newState = old;
             }
+
             world.checkLight(pos);
-            world.markAndNotifyBlock(pos, chunk, old, newState, UPDATE | NOTIFY);
+
+            if (!world.isClient) {
+                Block stateBlock = newState.getBlock();
+
+                if (chunk.isPopulated()) {
+                    world.onBlockChanged(pos, stateBlock);
+                }
+
+                if (stateBlock.hasAnalogOutput()) {
+                    world.updateComparators(pos, stateBlock);
+                }
+            }
         }
 
         return successful;
+    }
+
+    @Override
+    public int getBlockLightLevel(Vector position) {
+        checkNotNull(position);
+        return getWorld().getLight(new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ()));
+    }
+
+    @Override
+    public boolean clearContainerBlockContents(Vector position) {
+        checkNotNull(position);
+        BlockEntity tile = getWorld().getBlockEntity(new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ()));
+
+        if (tile instanceof InventoryBlockEntity) {
+            ((InventoryBlockEntity) tile).clear();
+            return true;
+        }
+
+        return false;
     }
 
     /**
