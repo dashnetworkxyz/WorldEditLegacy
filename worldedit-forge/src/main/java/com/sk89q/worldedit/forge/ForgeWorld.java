@@ -50,6 +50,7 @@ import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
@@ -479,7 +480,7 @@ public class ForgeWorld extends AbstractWorld {
         List<Entity> entities = new ArrayList<>();
 
         for (net.minecraft.entity.Entity entity : getWorld().loadedEntityList) {
-            if (region.contains(new Vector(entity.posX, entity.posY, entity.posZ))) {
+            if (region.contains(Vector.toBlockVector(entity.posX, entity.posY, entity.posZ))) {
                 entities.add(new ForgeEntity(entity));
             }
         }

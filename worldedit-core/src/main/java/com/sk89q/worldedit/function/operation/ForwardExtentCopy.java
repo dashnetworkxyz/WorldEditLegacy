@@ -337,10 +337,10 @@ public class ForwardExtentCopy implements Operation {
             if (copyingEntities) {
                 ExtentEntityCopy entityCopy = new ExtentEntityCopy(from, destination, to, currentTransform);
                 entityCopy.setRemoving(removingEntities);
-                List<? extends Entity> entities = Lists.newArrayList(source.getEntities(region));
+                List<? extends Entity> entities = source.getEntities(region);
                 entities.removeIf(entity -> {
                     EntityType type = entity.getFacet(EntityType.class);
-                    return type != null && type.isPasteable();
+                    return type != null && !type.isPasteable();
                 });
                 EntityVisitor entityVisitor = new EntityVisitor(entities.iterator(), entityCopy);
                 ops.add(entityVisitor);

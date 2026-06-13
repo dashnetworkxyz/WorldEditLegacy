@@ -98,6 +98,30 @@ public class Vector implements Comparable<Vector> {
     }
 
     /**
+     * Temporary fix for entity selection. This will be here until
+     * selections get moved to integer-coordinates
+     *
+     * @return A vector moved to integer-coordinates
+     * @deprecated Will be removed once selections are moved to ints
+     */
+    @Deprecated
+    public static Vector toBlockVector(double x, double y, double z) {
+        return new Vector(Math.floor(x), Math.floor(y), Math.floor(z));
+    }
+
+    /**
+     * Temporary fix for entity selection. This will be here until
+     * selections get moved to integer-coordinates.
+     *
+     * @return A vector moved to integer-coordinates
+     * @deprecated Will be removed once selections are moved to ints
+     */
+    @Deprecated
+    public static Vector toBlockVector(Vector vector) {
+        return toBlockVector(vector.x, vector.y, vector.z);
+    }
+
+    /**
      * Get the X coordinate.
      *
      * @return the x coordinate

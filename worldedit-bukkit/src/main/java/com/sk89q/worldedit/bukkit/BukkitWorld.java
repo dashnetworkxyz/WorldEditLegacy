@@ -90,7 +90,7 @@ public class BukkitWorld extends LocalWorld {
         List<Entity> ents = world.getEntities();
         List<com.sk89q.worldedit.entity.Entity> entities = new ArrayList<com.sk89q.worldedit.entity.Entity>();
         for (Entity ent : ents) {
-            if (region.contains(BukkitUtil.toVector(ent.getLocation()))) {
+            if (region.contains(Vector.toBlockVector(BukkitUtil.toVector(ent.getLocation())))) {
                 entities.add(BukkitAdapter.adapt(ent));
             }
         }
