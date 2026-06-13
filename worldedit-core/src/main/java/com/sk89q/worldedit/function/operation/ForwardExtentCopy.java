@@ -41,6 +41,7 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.Regions;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -337,7 +338,7 @@ public class ForwardExtentCopy implements Operation {
             if (copyingEntities) {
                 ExtentEntityCopy entityCopy = new ExtentEntityCopy(from, destination, to, currentTransform);
                 entityCopy.setRemoving(removingEntities);
-                List<? extends Entity> entities = Lists.newArrayList(source.getEntities(region));
+                List<? extends Entity> entities = new ArrayList<>(source.getEntities(region));
                 entities.removeIf(entity -> {
                     EntityType type = entity.getFacet(EntityType.class);
                     return type != null && !type.isPasteable();
