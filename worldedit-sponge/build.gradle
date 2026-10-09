@@ -1,18 +1,8 @@
 import org.spongepowered.gradle.plugin.config.PluginLoaders
 
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public' }
-        maven { url = 'https://maven.minecraftforge.net' }
-    }
-
-    dependencies {
-        classpath 'org.spongepowered.gradle.plugin:org.spongepowered.gradle.plugin.gradle.plugin:2.3.0'
-    }
+plugins {
+    id 'org.spongepowered.gradle.plugin' version '2.3.0'
 }
-
-apply plugin: 'org.spongepowered.gradle.plugin'
 
 dependencies {
     implementation project(':worldedit-core')
@@ -30,7 +20,7 @@ sponge {
     plugin('worldedit') {
         entrypoint('com.sk89q.worldedit.sponge.SpongeWorldEdit')
         description('')
-        version('')
+        version(version)
     }
 }
 
