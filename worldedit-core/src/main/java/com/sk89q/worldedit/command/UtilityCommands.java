@@ -532,8 +532,7 @@ public class UtilityCommands {
         } catch (TimeoutException e) {
             actor.printError("Calculations exceeded time limit");
         } catch (CompletionException | ExecutionException e) {
-            actor.printError(String.format(
-                    "'%s' could not be parsed as a valid expression", input));
+            actor.printError(String.format("'%s' could not be parsed as a valid expression", input));
         } catch (InterruptedException ignored) {}
     }
 

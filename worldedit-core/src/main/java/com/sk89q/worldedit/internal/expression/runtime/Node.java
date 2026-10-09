@@ -53,7 +53,6 @@ public abstract class Node implements RValue {
 
     protected void checkInterruption() throws EvaluationException {
         if (Thread.currentThread().isInterrupted()) {
-            System.out.println("CALCULATION WAS INTERRUPTED");
             throw new EvaluationException(position, new InterruptedException());
         }
     }
