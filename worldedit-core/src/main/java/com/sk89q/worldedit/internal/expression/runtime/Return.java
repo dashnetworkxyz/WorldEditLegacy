@@ -37,6 +37,7 @@ public class Return extends Node {
 
     @Override
     public double getValue() throws EvaluationException {
+        checkInterruption();
         throw new ReturnException(value.getValue());
     }
 

@@ -47,8 +47,10 @@ public class Sequence extends Node {
 
     @Override
     public double getValue() throws EvaluationException {
+        checkInterruption();
         double ret = 0;
         for (RValue invokable : sequence) {
+            checkInterruption();
             ret = invokable.getValue();
         }
         return ret;

@@ -34,6 +34,7 @@ public class Break extends Node {
 
     @Override
     public double getValue() throws EvaluationException {
+        checkInterruption();
         throw new BreakException(doContinue);
     }
 

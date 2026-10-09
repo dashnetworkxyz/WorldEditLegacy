@@ -43,10 +43,12 @@ public class For extends Node {
 
     @Override
     public double getValue() throws EvaluationException {
+        checkInterruption();
         int iterations = 0;
         double ret = 0.0;
 
         for (init.getValue(); condition.getValue() > 0; increment.getValue()) {
+            checkInterruption();
             if (iterations > 256) {
                 throw new EvaluationException(getPosition(), "Loop exceeded 256 iterations.");
             }

@@ -35,7 +35,8 @@ public final class Variable extends Node implements LValue {
     }
 
     @Override
-    public double getValue() {
+    public double getValue() throws EvaluationException {
+        checkInterruption();
         return value;
     }
 

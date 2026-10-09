@@ -41,6 +41,7 @@ public class Conditional extends Node {
 
     @Override
     public double getValue() throws EvaluationException {
+        checkInterruption();
         if (condition.getValue() > 0.0) {
             return truePart.getValue();
         } else {

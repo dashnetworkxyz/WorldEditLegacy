@@ -43,6 +43,7 @@ public class SimpleFor extends Node {
 
     @Override
     public double getValue() throws EvaluationException {
+        checkInterruption();
         int iterations = 0;
         double ret = 0.0;
 
@@ -50,6 +51,7 @@ public class SimpleFor extends Node {
         double lastValue = last.getValue();
 
         for (double i = firstValue; i <= lastValue; ++i) {
+            checkInterruption();
             if (iterations > 256) {
                 throw new EvaluationException(getPosition(), "Loop exceeded 256 iterations.");
             }

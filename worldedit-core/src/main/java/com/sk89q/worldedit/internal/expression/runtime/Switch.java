@@ -68,6 +68,7 @@ public class Switch extends Node implements RValue {
 
     @Override
     public double getValue() throws EvaluationException {
+        checkInterruption();
         final double parameter = this.parameter.getValue();
 
         try {

@@ -32,7 +32,8 @@ public final class Constant extends Node {
     }
 
     @Override
-    public double getValue() {
+    public double getValue() throws EvaluationException {
+        checkInterruption();
         return value;
     }
 

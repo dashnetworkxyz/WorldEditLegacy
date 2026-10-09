@@ -50,6 +50,7 @@ public class Function extends Node {
 
     @Override
     public final double getValue() throws EvaluationException {
+        checkInterruption();
         return invokeMethod(method, args);
     }
 

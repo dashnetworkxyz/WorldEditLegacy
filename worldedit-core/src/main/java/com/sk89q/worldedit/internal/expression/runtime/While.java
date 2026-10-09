@@ -41,11 +41,13 @@ public class While extends Node {
 
     @Override
     public double getValue() throws EvaluationException {
+        checkInterruption();
         int iterations = 0;
         double ret = 0.0;
 
         if (footChecked) {
             do {
+                checkInterruption();
                 if (iterations > 256) {
                     throw new EvaluationException(getPosition(), "Loop exceeded 256 iterations.");
                 }
@@ -63,6 +65,7 @@ public class While extends Node {
             } while (condition.getValue() > 0.0);
         } else {
             while (condition.getValue() > 0.0) {
+                checkInterruption();
                 if (iterations > 256) {
                     throw new EvaluationException(getPosition(), "Loop exceeded 256 iterations.");
                 }
